@@ -1,7 +1,7 @@
 import time
 from queue import Queue
 from queue import Empty
-from collector.process_collector import collect_process_activity
+from collector.process_monitor import ProcessMonitor
 from collector.system_collector import collect_system_activity
 from collector.file_collector import FileMonitor
 from collector.usb_monitor import USBMonitor
@@ -20,6 +20,9 @@ def run_agent():
     usb_monitor = USBMonitor(event_callback)
     usb_monitor.start()
 
+    process_monitor = ProcessMonitor(event_callback, interval=10)
+    process_monitor.start()
+
     while True:
         events = []
         
@@ -29,7 +32,6 @@ def run_agent():
         except Empty:
             pass
 
-        events.extend(collect_process_activity())
         events.extend(collect_system_activity())
 
         if events:
