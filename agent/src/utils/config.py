@@ -8,6 +8,9 @@ SYSTEM_INFO = {
     "os_version": platform.version(),
     "machine": platform.machine()
 }
+MONITORED_DIRECTORIES = {
+    r"D:\Personal_Projects"
+}
 
 def base_event(event_type):
     return {
