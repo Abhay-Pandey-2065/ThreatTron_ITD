@@ -6,6 +6,7 @@ from collector.system_collector import collect_system_activity
 from collector.file_collector import FileMonitor
 from collector.usb_monitor import USBMonitor
 from sender.sender import send_events
+from mail.email_monitor import EmailMonitor
 from utils.config import MONITORED_DIRECTORIES
 
 event_queue = Queue()
@@ -22,6 +23,9 @@ def run_agent():
 
     process_monitor = ProcessMonitor(event_callback, interval=10)
     process_monitor.start()
+
+    email_monitor = EmailMonitor(event_callback, interval = 30)
+    email_monitor.start()
 
     while True:
         events = []

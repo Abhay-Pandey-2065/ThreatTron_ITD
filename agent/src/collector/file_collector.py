@@ -22,12 +22,6 @@ class CorporateFileHandler(FileSystemEventHandler):
     def on_deleted(self, event):
         self._handle_event(event, "deleted")
 
-    # def calculate_file_hash(self, path):
-    #     try:
-    #         if not os.path.isfile(path):
-    #             return None
-    #         if os.path.getsize(path)>
-
     def is_outside_monitored_scope(self, path):
         path = os.path.abspath(path).lower()
         monitored = [os.path.abspath(d).lower() for d in MONITORED_DIRECTORIES]
