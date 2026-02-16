@@ -46,3 +46,62 @@ def send_events(events):
             print(f"    Contains Links: {metadata.get('has_links')}")
 
     print("============================================\n")
+
+# import requests
+
+# BASE_URL = "http://127.0.0.1:8000/events"
+
+# ENDPOINTS = {
+#     "file": f"{BASE_URL}/files",
+#     "process": f"{BASE_URL}/processes",
+#     "system": f"{BASE_URL}/system",
+#     "email": f"{BASE_URL}/emails",
+#     "usb": f"{BASE_URL}/usb"
+# }
+
+# def categorize_events(events):
+#     grouped = {
+#         "file": [],
+#         "process": [],
+#         "system": [],
+#         "email": [],
+#         "usb": []
+#     }
+
+#     for event in events:
+#         et = event["event_type"]
+
+#         if et in ["file_activity", "file_moved"]:
+#             grouped["file"].append(event)
+
+#         elif et in ["process_started", "process_terminated", "startup_process"]:
+#             grouped["process"].append(event)
+
+#         elif et == "system_activity":
+#             grouped["system"].append(event)
+
+#         elif et == "email_received":
+#             grouped["email"].append(event)
+
+#         elif et in ["usb_inserted", "usb_removed"]:
+#             grouped["usb"].append(event)
+
+#     return grouped
+
+
+# def send_events(events):
+#     grouped = categorize_events(events)
+
+#     for key, event_list in grouped.items():
+#         if not event_list:
+#             continue
+
+#         try:
+#             response = requests.post(
+#                 ENDPOINTS[key],
+#                 json=event_list
+#             )
+#             print(f"Sent {len(event_list)} {key} events → {response.status_code}")
+#         except Exception as e:
+#             print(f"Error sending {key} events:", e)
+
