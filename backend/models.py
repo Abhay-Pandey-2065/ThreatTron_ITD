@@ -54,7 +54,7 @@ class USBEvent(Base):
     timestamp = Column(DateTime)
     mountpoint = Column(String(255))
 
-# NOTE (Very Importangt): Implement a mechanism to implement keys to recognize
+# NOTE (Very Important): Implement a mechanism to implement keys to recognize
 # and map events to user.
 # Suppose agent is run on two machines, A and B. Both will be stored in same database,
 # however, there should be a way to differentiate which events came from which machine.
