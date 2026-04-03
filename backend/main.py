@@ -38,12 +38,12 @@ def receive_events(payload: dict):
         agent_id = event.get("agent_id")
 
         # FILE EVENTS
-        if event_type in ["file_activity", "file_moved"]:
+        if event_type in ["file_activity", "file_moved", "file_renamed"]:
             db_event = FileEvent(
                 agent_id=agent_id,
                 event_type=event_type,
                 timestamp=timestamp,
-                file_path=metadata.get("file_data") or metadata.get("source_path"),
+                file_path=metadata.get("file_path") or metadata.get("source_path") or metadata.get("directory"),
                 action=metadata.get("action"),
                 extra_data=metadata
             )

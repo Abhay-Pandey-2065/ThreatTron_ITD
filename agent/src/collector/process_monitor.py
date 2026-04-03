@@ -23,15 +23,14 @@ class ProcessMonitor:
         return processes
     
     def start(self):
-        self._log_startup_snapshot()
-        
+        # self._log_startup_snapshot()
         thread = threading.Thread(target = self._monitor_loop)
         thread.daemon = True
         thread.start()
 
     def _log_startup_snapshot(self):
         for name, exe in self.baseline:
-            event = base_event("startup_process")
+            event = base_event("baseline_process")
             event["metadata"] = {
                 "process_name": name,
                 "exe_path": exe

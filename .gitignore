@@ -1,5 +1,7 @@
 __pycache__/
+
 *.pyc
+
 .venv/
 
 node_modules/
@@ -9,4 +11,9 @@ node_modules/
 *.db
 
 credentials.json
+
 token.pickle
+
+.vscode
+
+datasets/
