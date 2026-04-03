@@ -154,7 +154,7 @@ class CorporateFileHandler(FileSystemEventHandler):
             else:
                 action = "moved_outside_scope"
                 moved_outside = True
-                
+
         event_data = base_event("file_activity")
         event_data["metadata"] = {
             "file_path": path,
@@ -165,7 +165,7 @@ class CorporateFileHandler(FileSystemEventHandler):
         }
         self.event_callback(event_data)
 
-    def _is_in_recycle_bin(self, filename, expected_size=None):
+    def _is_in_recycle_bin(self, filename, expected_size=None, max_age_seconds=5):
         now_filetime = int((time.time() + 11644473600) * 10000000)
 
         for partition in psutil.disk_partitions(all=False):
