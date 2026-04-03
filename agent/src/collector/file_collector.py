@@ -2,6 +2,7 @@ import os
 import psutil
 import time
 import threading
+import struct
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from utils.config import base_event
@@ -145,7 +146,7 @@ class CorporateFileHandler(FileSystemEventHandler):
             filename = os.path.basename(path)
             expected_size = entry.get("size") if isinstance(entry, dict) else None
 
-            in_recycle_bin = self._is_in_recycle_bin(filename, expected_size)
+            in_recycle_bin = self._is_in_recycle_bin(filename, expected_size, max_age_seconds=5)
 
             if in_recycle_bin:
                 action = "deleted"
@@ -153,6 +154,7 @@ class CorporateFileHandler(FileSystemEventHandler):
             else:
                 action = "moved_outside_scope"
                 moved_outside = True
+                
         event_data = base_event("file_activity")
         event_data["metadata"] = {
             "file_path": path,
@@ -164,6 +166,8 @@ class CorporateFileHandler(FileSystemEventHandler):
         self.event_callback(event_data)
 
     def _is_in_recycle_bin(self, filename, expected_size=None):
+        now_filetime = int((time.time() + 11644473600) * 10000000)
+
         for partition in psutil.disk_partitions(all=False):
             recycle_paths = [
                 os.path.join(partition.mountpoint, "$Recycle.Bin"),
@@ -179,8 +183,14 @@ class CorporateFileHandler(FileSystemEventHandler):
                         for item in os.scandir(user_dir.path):
                             if not item.name.startswith("$I"):
                                 continue
-                            original_name = self._read_recycle_bin_metadata(item.path)
-                            if original_name and os.path.basename(original_name) == filename:
+                            result = self._read_recycle_bin_metadata(item.path)
+                            if result is None:
+                                continue
+                            original_name, deleted_filetime = result
+                            if os.path.basename(original_name) != filename:
+                                continue
+                            ago_seconds = (now_filetime - deleted_filetime) / 10000000
+                            if 0 <= ago_seconds <= max_age_seconds:
                                 return True
                 except (PermissionError, OSError):
                     continue
@@ -192,8 +202,9 @@ class CorporateFileHandler(FileSystemEventHandler):
                 data = f.read()
             if len(data) < 28:
                 return None
+            deleted_filetime = struct.unpack("<q", data, 16)[0]
             original_path = data[28:].decode("utf-16-le").rstrip("\x00")
-            return original_path
+            return original_path, deleted_filetime
         except Exception:
             return None
 
