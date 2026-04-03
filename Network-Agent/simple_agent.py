@@ -4,15 +4,11 @@ import hashlib
 import time
 import os
 
-# ==========================================
-# ETHICAL GUARDRAIL 1: EXPLICIT CONSENT
-# If this is False, the script refuses to run.
-# ==========================================
 CONSENT_GRANTED = True 
 
 DB_PATH = "simple_agent_data.db"
-RETENTION_HOURS = 24  # Keep data for only 24 hours
-SALT = "my_secure_salt_string" # Used to scramble IPs
+RETENTION_HOURS = 24  
+SALT = "my_secure_salt_string" 
 
 def setup_database():
     """Creates a simple SQLite database to store our connections if it doesn't exist."""
