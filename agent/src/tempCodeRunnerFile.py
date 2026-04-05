@@ -7,7 +7,6 @@ from collector.file_collector import FileMonitor
 from collector.usb_monitor import USBMonitor
 from sender.sender import send_events
 from mail.email_monitor import EmailMonitor
-from utils.session import session as agent_session
 from utils.config import MONITORED_DIRECTORIES
 
 event_queue = Queue()
@@ -16,11 +15,6 @@ def event_callback(event):
     event_queue.put(event)
 
 def run_agent():
-    from utils.config import base_event
-    session_event = base_event("session_started")
-    session_event["metadata"] = agent_session.to_dict()
-    send_events([session_event])
-    
     file_monitor = FileMonitor(MONITORED_DIRECTORIES, event_callback)
     file_monitor.start()
 

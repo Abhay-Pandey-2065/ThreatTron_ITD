@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
-from models import Base, FileEvent, ProcessEvent, SystemEvent, EmailEvent, USBEvent
+from models import Base, AgentSession, FileEvent, ProcessEvent, SystemEvent, EmailEvent, USBEvent
 from datetime import datetime
 
 # Create tables
@@ -11,12 +11,12 @@ app = FastAPI()
 
 
 # Dependency (DB session)
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+# def get_db():
+#     db = SessionLocal()
+#     try:
+#         yield db
+#     finally:
+#         db.close()
 
 
 @app.get("/")
@@ -24,7 +24,6 @@ def root():
     return {"message": "ThreatTron Backend Running (MySQL)"}
 
 
-# 🔥 MAIN INGEST ENDPOINT
 @app.post("/events/batch")
 def receive_events(payload: dict):
     db: Session = SessionLocal()
@@ -36,22 +35,39 @@ def receive_events(payload: dict):
         metadata = event.get("metadata", {})
         timestamp = datetime.fromisoformat(event.get("timestamp"))
         agent_id = event.get("agent_id")
+        session_id = event.get("session_id")
+
+        if event_type == "session_started":
+            existing = db.get(AgentSession, session_id)
+            if not existing:
+                db.add(AgentSession(
+                    session_id=session_id,
+                    agent_id=agent_id,
+                    hostname=metadata.get("hostname"),
+                    mac_address=metadata.get("mac_address"),
+                    started_at=timestamp
+                ))
+            db.flush()
+            continue
+        if not session_id or db.get(AgentSession, session_id) is None:
+            continue
 
         # FILE EVENTS
         if event_type in ["file_activity", "file_moved", "file_renamed"]:
-            db_event = FileEvent(
+            db.add(FileEvent(
+                session_id=session_id,
                 agent_id=agent_id,
                 event_type=event_type,
                 timestamp=timestamp,
-                file_path=metadata.get("file_path") or metadata.get("source_path") or metadata.get("directory"),
+                file_path=metadata.get("file_path") or metadata.get("src_path") or metadata.get("directory"),
                 action=metadata.get("action"),
-                extra_data=metadata
-            )
-            db.add(db_event)
+                extra_data=metadata.get("extra_data")
+            ))
 
         # PROCESS EVENTS
         elif event_type in ["process_started", "process_terminated", "startup_process"]:
             db_event = ProcessEvent(
+                session_id=session_id,
                 agent_id=agent_id,
                 event_type=event_type,
                 timestamp=timestamp,
@@ -63,6 +79,7 @@ def receive_events(payload: dict):
         # SYSTEM EVENTS
         elif event_type == "system_activity":
             db_event = SystemEvent(
+                session_id=session_id,
                 agent_id=agent_id,
                 timestamp=timestamp,
                 cpu_usage=metadata.get("cpu_usage"),
@@ -73,6 +90,7 @@ def receive_events(payload: dict):
         # EMAIL EVENTS
         elif event_type == "email_received":
             db_event = EmailEvent(
+                session_id=session_id,
                 agent_id=agent_id,
                 timestamp=timestamp,
                 sender=metadata.get("sender"),
@@ -85,6 +103,7 @@ def receive_events(payload: dict):
         # USB EVENTS
         elif event_type in ["usb_inserted", "usb_removed"]:
             db_event = USBEvent(
+                session_id=session_id,
                 agent_id=agent_id,
                 event_type=event_type,
                 timestamp=timestamp,

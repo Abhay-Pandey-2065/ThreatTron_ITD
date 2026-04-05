@@ -1,58 +1,95 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, JSON
+from sqlalchemy import Column, Integer, String, DateTime, Float, JSON, ForeignKey
+from sqlalchemy.orm import relationship, declared_attr
 from database import Base
 
-class FileEvent(Base):
+class AgentSession(Base):
+    __tablename__ = "agent_sessions"
+
+    session_id = Column(String(36), primary_key=True)
+    agent_id = Column(String(50), nullable=False, index=True)
+    hostname = Column(String(255), nullable=True)
+    mac_address = Column(String(17), nullable=True)
+    started_at = Column(DateTime, nullable=False)
+
+    file_events = relationship("FileEvent", back_populates="session")
+    process_events = relationship("ProcessEvent", back_populates="session")
+    system_events = relationship("SystemEvent", back_populates="session")
+    usb_events = relationship("USBEvent", back_populates="session")
+    email_events = relationship("EmailEvent", back_populates="session")
+
+class SessionMixin:
+
+    @declared_attr
+    def session_id(cls): 
+        return Column(
+            String(36),
+            ForeignKey("agent_sessions.session_id", ondelete="CASCADE"),
+            nullable=False,
+            index=True
+        )
+    
+    @declared_attr
+    def agent_id(cls):
+        return Column(String(50), nullable=False, index=True)
+
+class FileEvent(SessionMixin, Base):
     __tablename__ = "file_events"
 
-    id = Column(Integer, primary_key=True)
-    agent_id = Column(String(255), index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # agent_id = Column(String(255), index=True)
     event_type = Column(String(100))
     timestamp = Column(DateTime)
     file_path = Column(String(1000))
     action = Column(String(100))
     extra_data = Column(JSON)
+    session = relationship("AgentSession", back_populates="file_events")
 
 
-class ProcessEvent(Base):
+class ProcessEvent(SessionMixin, Base):
     __tablename__ = "process_events"
 
-    id = Column(Integer, primary_key=True)
-    agent_id = Column(String(255), index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # agent_id = Column(String(255), index=True)
     event_type = Column(String(100))
     timestamp = Column(DateTime)
     process_name = Column(String(255))
     exe_path = Column(String(1000))
+    session = relationship("AgentSession", back_populates="process_events")
 
 
-class SystemEvent(Base):
+class SystemEvent(SessionMixin, Base):
     __tablename__ = "system_events"
 
-    id = Column(Integer, primary_key=True)
-    agent_id = Column(String(255), index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # agent_id = Column(String(255), index=True)
     timestamp = Column(DateTime)
     cpu_usage = Column(Float)
     memory_usage = Column(Float)
+    session = relationship("AgentSession", back_populates="system_events")
 
 
-class EmailEvent(Base):
+class EmailEvent(SessionMixin, Base):
     __tablename__ = "email_events"
 
-    id = Column(Integer, primary_key=True)
-    agent_id = Column(String(255), index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # agent_id = Column(String(255), index=True)
     timestamp = Column(DateTime)
     sender = Column(String(500))
     subject = Column(String(1000))
     snippet_length = Column(Integer)
     has_links = Column(String(10))
+    session = relationship("AgentSession", back_populates="email_events")
 
-class USBEvent(Base):
+class USBEvent(SessionMixin, Base):
     __tablename__ = "usb_events"
 
-    id = Column(Integer, primary_key=True)
-    agent_id = Column(String(255), index=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    # agent_id = Column(String(255), index=True)
     event_type = Column(String(100))
     timestamp = Column(DateTime)
     mountpoint = Column(String(255))
+    session = relationship("AgentSession", back_populates="usb_events")
+
 
 # NOTE (Very Important): Implement a mechanism to implement keys to recognize
 # and map events to user.
