@@ -3,6 +3,12 @@ import threading
 import time
 from utils.config import base_event
 
+ADMIN_TOOLS = {
+    "powershell.exe","cmd.exe", "wmic.exe", "wscript.exe", "cscript.exe",
+    "mshta.exe", "rundll32.exe", "regsvr32.exe", "certutil.exe", "net.exe",
+    "netsh.exe", "schtasks.exe", "taskkill.exe", "reg.exe", "psexec.exe"
+}
+
 class ProcessMonitor:
 
     def __init__(self, event_callback, interval=10):
@@ -33,7 +39,8 @@ class ProcessMonitor:
             event = base_event("baseline_process")
             event["metadata"] = {
                 "process_name": name,
-                "exe_path": exe
+                "exe_path": exe,
+                "is_admin_tool": name.lower() in ADMIN_TOOLS
             }
             self.event_callback(event)
 
@@ -48,7 +55,8 @@ class ProcessMonitor:
                 event = base_event("process_started")
                 event["metadata"] = {
                     "process_name": name,
-                    "exe_path": exe
+                    "exe_path": exe,
+                    "is_admin_tool": name.lower() in ADMIN_TOOLS
                 }
                 self.event_callback(event)
 
@@ -56,7 +64,8 @@ class ProcessMonitor:
                 event = base_event("process_terminated")
                 event["metadata"] = {
                     "process_name": name,
-                    "exe_path": exe
+                    "exe_path": exe,
+                    "is_admin_tool": name.lower() in ADMIN_TOOLS
                 }
                 self.event_callback(event)
 

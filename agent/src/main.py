@@ -1,23 +1,25 @@
 import time
-from queue import Queue
-from queue import Empty
+import socket
+from queue import Queue, Empty
 from collector.process_monitor import ProcessMonitor
 from collector.system_collector import collect_system_activity
 from collector.file_collector import FileMonitor
 from collector.usb_monitor import USBMonitor
-from sender.sender import send_events
 from mail.email_monitor import EmailMonitor
+from sender.sender import send_events
+from utils.config import MONITORED_DIRECTORIES, base_event
 from utils.session import session as agent_session
-from utils.config import MONITORED_DIRECTORIES
 
 event_queue = Queue()
+HOSTNAME = socket.gethostname()
 
 def event_callback(event):
+    event["hostname"] = HOSTNAME
     event_queue.put(event)
 
 def run_agent():
-    from utils.config import base_event
     session_event = base_event("session_started")
+    session_event["hostname"] = HOSTNAME
     session_event["metadata"] = agent_session.to_dict()
     send_events([session_event])
     
@@ -42,7 +44,10 @@ def run_agent():
         except Empty:
             pass
 
-        events.extend(collect_system_activity())
+        system_events = collect_system_activity()
+        for e in system_events:
+            e["hostname"] = HOSTNAME
+        events.extend(system_events)
 
         if events:
             send_events(events)

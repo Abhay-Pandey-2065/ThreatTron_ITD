@@ -142,10 +142,11 @@ class CorporateFileHandler(FileSystemEventHandler):
         action = "deleted"
         moved_outside = False
 
+        expected_size = entry.get("size") if isinstance(entry, dict) else None
+
         if not is_directory:
             filename = os.path.basename(path)
-            expected_size = entry.get("size") if isinstance(entry, dict) else None
-
+            # expected_size = entry.get("size") if isinstance(entry, dict) else None
             in_recycle_bin = self._is_in_recycle_bin(filename, expected_size, max_age_seconds=5)
 
             if in_recycle_bin:
@@ -160,7 +161,7 @@ class CorporateFileHandler(FileSystemEventHandler):
             "file_path": path,
             "action": action,
             "is_directory": is_directory,
-            "file_size": None,
+            "file_size": expected_size,
             "moved_outside_scope": moved_outside
         }
         self.event_callback(event_data)
