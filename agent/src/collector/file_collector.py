@@ -8,7 +8,19 @@ from watchdog.events import FileSystemEventHandler
 from utils.config import base_event
 from utils.config import MONITORED_DIRECTORIES
 
-IGNORED_PATHS = [".git", "__pycache__", "node_modules", ".venv", "AppData", "Temp"]
+IGNORED_PATHS = [
+    ".git", "__pycache__", "node_modules", ".venv", "AppData", "Temp",
+    ".vscode", ".gradle", ".m2", ".npm", "dist", "build", "out",
+    ".pytest_cache", ".tox", "venv", ".idea", ".mypy_cache",
+    "target", ".next", ".nuxt", "__pycache__", "*.tmp", "*.bak",
+    "vendor", ".cargo", "Thumbs.db", "Desktop.ini", ".DS_Store"
+]
+
+IGNORED_EXTENSIONS = {
+    ".tmp", ".bak", ".swp", ".swo", ".log", ".lock", ".pid",
+    ".cache", ".class", ".pyc", ".pyo", ".exe", ".dll", ".so",
+    ".coverage", ".lcov", ".profdata"
+}
 
 class CorporateFileHandler(FileSystemEventHandler):
 
@@ -77,6 +89,7 @@ class CorporateFileHandler(FileSystemEventHandler):
         src_dir = os.path.dirname(src)
         dest_dir = os.path.dirname(dest)
         
+        # Use longer suppress window (10 seconds) to match deduplication window
         suppress_time = time.time()
         with self._lock:
             for path in [src, dest, src_dir, dest_dir]:
@@ -104,7 +117,8 @@ class CorporateFileHandler(FileSystemEventHandler):
         self.event_callback(event_data)
 
     def on_modified(self, event):
-        threading.Timer(0.2, self._delayed_modified, args=[event]).start()
+        # Increased delay from 0.2s to 0.5s to batch rapid modifications
+        threading.Timer(0.5, self._delayed_modified, args=[event]).start()
 
     def on_deleted(self, event):
         if self.should_ignore(event.src_path) or "ThreatTron_ITD" in event.src_path:
@@ -222,13 +236,37 @@ class CorporateFileHandler(FileSystemEventHandler):
         return False
     
     def should_ignore(self, path):
-        return any(ignore.lower() in path.lower() for ignore in IGNORED_PATHS)
+        # Ignore common paths
+        if any(ignore.lower() in path.lower() for ignore in IGNORED_PATHS):
+            return True
+        
+        # Ignore specific file extensions
+        _, ext = os.path.splitext(path)
+        if ext.lower() in IGNORED_EXTENSIONS:
+            return True
+        
+        # Ignore system/hidden files
+        try:
+            import stat
+            if os.path.exists(path):
+                file_stat = os.stat(path)
+                # Check for Windows hidden attribute
+                if hasattr(file_stat, 'st_file_attributes'):
+                    if file_stat.st_file_attributes & 0x02:  # FILE_ATTRIBUTE_HIDDEN
+                        return True
+        except Exception:
+            pass
+        
+        return False
     
     def suppress_path(self, path):
         now = time.time()
         with self._lock:
             self.suppress_modifications[path] = now
-            self.suppress_modifications[os.path.dirname(path)] = now
+            # Also suppress parent directory to catch cascading events
+            parent = os.path.dirname(path)
+            if parent and parent != path:
+                self.suppress_modifications[parent] = now
 
     def _handle_event(self, event, action):
         if time.time() - self.start_time < 3:
@@ -238,19 +276,21 @@ class CorporateFileHandler(FileSystemEventHandler):
         
         now = time.time()
         with self._lock:
+            # Clean up old suppress entries (keep only last 10 seconds)
             self.suppress_modifications = {
                 p: t for p, t in self.suppress_modifications.items()
-                if now - t < 5
+                if now - t < 10
             }
             if action in ("modified", "deleted"):
                 for path, t in self.suppress_modifications.items():
-                    if now - t > 5:
+                    if now - t > 10:
                         continue
                     if (event.src_path == path or event.src_path.startswith(path + os.sep) or path.startswith(event.src_path + os.sep)):
                         return
 
+        # Increased deduplication window from 2 to 10 seconds to reduce noise from batched modifications
         key = (event.src_path, action)
-        if key in self.last_events and now - self.last_events[key] < 2:
+        if key in self.last_events and now - self.last_events[key] < 10:
             return
         self.last_events[key] = now
 
