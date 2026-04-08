@@ -18,13 +18,16 @@ class EmailMonitor:
 
     def _monitor_loop(self):
         while True:
-            messages = self.collector.fetch_recent_emails(5)
-            for msg in messages:
-                if msg["id"] not in self.seen_ids:
-                    full_msg = self.collector.get_messages(msg["id"])
-                    features = self.collector.extract_features(full_msg)
-                    event = base_event("email_received")
-                    event["metadata"] = features
-                    self.event_callback(event)
-                    self.seen_ids.add(msg["id"])
+            try:
+                messages = self.collector.fetch_recent_emails(5)
+                for msg in messages:
+                    if msg["id"] not in self.seen_ids:
+                        full_msg = self.collector.get_messages(msg["id"])
+                        features = self.collector.extract_features(full_msg)
+                        event = base_event("email_received")
+                        event["metadata"] = features
+                        self.event_callback(event)
+                        self.seen_ids.add(msg["id"])
+            except Exception as e:
+                print(f"[EmailMonitor] Error fetching emails: {type(e).__name__}: {e}")
             time.sleep(self.interval)

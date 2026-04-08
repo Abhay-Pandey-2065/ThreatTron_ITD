@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float, JSON, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, Float, JSON, ForeignKey
 from sqlalchemy.orm import relationship, declared_attr
 from database import Base
 
@@ -16,6 +16,7 @@ class AgentSession(Base):
     system_events = relationship("SystemEvent", back_populates="session")
     usb_events = relationship("USBEvent", back_populates="session")
     email_events = relationship("EmailEvent", back_populates="session")
+    network_events = relationship("NetworkEvent", back_populates="session")
 
 class SessionMixin:
 
@@ -54,6 +55,9 @@ class ProcessEvent(SessionMixin, Base):
     timestamp = Column(DateTime)
     process_name = Column(String(255))
     exe_path = Column(String(1000))
+    parent_name = Column(String(255), nullable = True)
+    parent_pid = Column(Integer, nullable = True)
+    suspicious_spawn = Column(Boolean, nullable = True)
     session = relationship("AgentSession", back_populates="process_events")
 
 
@@ -77,7 +81,7 @@ class EmailEvent(SessionMixin, Base):
     sender = Column(String(500))
     subject = Column(String(1000))
     snippet_length = Column(Integer)
-    has_links = Column(String(10))
+    has_links = Column(Boolean)
     session = relationship("AgentSession", back_populates="email_events")
 
 class USBEvent(SessionMixin, Base):
@@ -89,6 +93,20 @@ class USBEvent(SessionMixin, Base):
     timestamp = Column(DateTime)
     mountpoint = Column(String(255))
     session = relationship("AgentSession", back_populates="usb_events")
+
+class NetworkEvent(SessionMixin, Base):
+    __tablename__ = "network_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    timestamp = Column(DateTime, index=True)
+    local_ip_hash = Column(String(64))
+    local_port = Column(Integer)
+    remote_ip_hash = Column(String(64))
+    remote_port = Column(Integer)
+    status = Column(String(50))
+    pid = Column(Integer, nullable=True)
+    process_name = Column(String(255), nullable=True)
+    session = relationship("AgentSession", back_populates="network_events")
 
 
 # NOTE (Very Important): Implement a mechanism to implement keys to recognize

@@ -1,22 +1,13 @@
 from fastapi import FastAPI
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine
-from models import Base, AgentSession, FileEvent, ProcessEvent, SystemEvent, EmailEvent, USBEvent
+from models import Base, AgentSession, FileEvent, ProcessEvent, SystemEvent, EmailEvent, USBEvent, NetworkEvent
 from datetime import datetime
 
 # Create tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-
-# Dependency (DB session)
-# def get_db():
-#     db = SessionLocal()
-#     try:
-#         yield db
-#     finally:
-#         db.close()
 
 
 @app.get("/")
@@ -49,6 +40,7 @@ def receive_events(payload: dict):
                 ))
             db.flush()
             continue
+
         if not session_id or db.get(AgentSession, session_id) is None:
             continue
 
@@ -66,13 +58,33 @@ def receive_events(payload: dict):
 
         # PROCESS EVENTS
         elif event_type in ["process_started", "process_terminated", "startup_process"]:
+            suspicious_raw = metadata.get("suspicious_spawn")
             db_event = ProcessEvent(
                 session_id=session_id,
                 agent_id=agent_id,
                 event_type=event_type,
                 timestamp=timestamp,
                 process_name=metadata.get("process_name"),
-                exe_path=metadata.get("exe_path")
+                exe_path=metadata.get("exe_path"),
+                parent_name=metadata.get("parent_name"),
+                parent_pid=metadata.get("parent_pid"),
+                suspicious_spawn=bool(suspicious_raw) if suspicious_raw is not None else None,
+            )
+            db.add(db_event)
+
+        # NETWORK EVENTS
+        elif event_type == "network_connection":
+            db_event = NetworkEvent(
+                session_id=session_id,
+                agent_id=agent_id,
+                timestamp=timestamp,
+                local_ip_hash=metadata.get("local_ip_hash"),
+                local_port=metadata.get("local_port"),
+                remote_ip_hash=metadata.get("remote_ip_hash"),
+                remote_port=metadata.get("remote_port"),
+                status=metadata.get("status"),
+                pid=metadata.get("pid"),
+                process_name=metadata.get("process_name"),
             )
             db.add(db_event)
 
@@ -89,6 +101,7 @@ def receive_events(payload: dict):
 
         # EMAIL EVENTS
         elif event_type == "email_received":
+            has_links_raw = metadata.get("has_links")
             db_event = EmailEvent(
                 session_id=session_id,
                 agent_id=agent_id,
@@ -96,7 +109,7 @@ def receive_events(payload: dict):
                 sender=metadata.get("sender"),
                 subject=metadata.get("subject"),
                 snippet_length=metadata.get("snippet_length"),
-                has_links=str(metadata.get("has_links"))
+                has_links=bool(has_links_raw) if has_links_raw is not None else None,
             )
             db.add(db_event)
 

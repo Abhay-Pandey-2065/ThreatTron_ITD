@@ -2,6 +2,7 @@ import time
 import socket
 from queue import Queue, Empty
 from collector.process_monitor import ProcessMonitor
+from collector.network_monitor import NetworkMonitor
 from collector.system_collector import collect_system_activity
 from collector.file_collector import FileMonitor
 from collector.usb_monitor import USBMonitor
@@ -31,6 +32,9 @@ def run_agent():
 
     process_monitor = ProcessMonitor(event_callback, interval=10)
     process_monitor.start()
+
+    network_monitor = NetworkMonitor(event_callback, interval=15)
+    network_monitor.start()
 
     email_monitor = EmailMonitor(event_callback, interval = 30)
     email_monitor.start()
