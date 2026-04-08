@@ -1,0 +1,202 @@
+=== RIGOROUS OBSERVABLE VALIDATION REPORT ===
+
+Total Users Examined: 1000
+Users Flagged as Threats (> 0.8 Risk): 61
+True Insiders Captured: 61 / 191
+Missed Insiders (False Negatives): 130
+
+--- MISSED (FALSE NEGATIVES) ---
+User: ONS0995 (Model Score: N/A)
+User: CSF0929 (Model Score: N/A)
+User: CCH0959 (Model Score: N/A)
+User: RCW0822 (Model Score: N/A)
+User: JCE0258 (Model Score: N/A)
+User: ABB0427 (Model Score: N/A)
+User: HFC0492 (Model Score: N/A)
+User: KTW0365 (Model Score: N/A)
+User: BLS0678 (Model Score: 0.7913838709652171)
+User: BTL0226 (Model Score: 0.7629253448334966)
+User: EHB0824 (Model Score: 0.7686802022101247)
+User: HJB0742 (Model Score: 0.7757764397215566)
+User: PPF0435 (Model Score: 0.7865522490682764)
+User: RGG0064 (Model Score: 0.7986780382994656)
+User: TAP0551 (Model Score: 0.7891077208007808)
+User: WDD0366 (Model Score: 0.7921904416254038)
+User: ABC0174 (Model Score: 0.7927221081448576)
+User: JTC1885 (Model Score: N/A)
+User: LBE0376 (Model Score: N/A)
+User: BGC0686 (Model Score: N/A)
+User: JAK0783 (Model Score: N/A)
+User: ALT1465 (Model Score: N/A)
+User: ALW0764 (Model Score: N/A)
+User: AYG1697 (Model Score: N/A)
+User: DAS1320 (Model Score: N/A)
+User: DNJ0740 (Model Score: N/A)
+User: ELT1370 (Model Score: N/A)
+User: EPG1196 (Model Score: N/A)
+User: ETW0002 (Model Score: N/A)
+User: FZG0389 (Model Score: N/A)
+User: GFM1815 (Model Score: N/A)
+User: IHC0561 (Model Score: N/A)
+User: ISW0738 (Model Score: N/A)
+User: JKB0287 (Model Score: N/A)
+User: JUP1472 (Model Score: N/A)
+User: KBC1390 (Model Score: N/A)
+User: KEW0198 (Model Score: N/A)
+User: MIB0203 (Model Score: N/A)
+User: NIV1608 (Model Score: N/A)
+User: PBC0077 (Model Score: N/A)
+User: PTH0005 (Model Score: N/A)
+User: REF1924 (Model Score: N/A)
+User: SAF1942 (Model Score: N/A)
+User: SLL0193 (Model Score: N/A)
+User: TMC0934 (Model Score: N/A)
+User: VAH1292 (Model Score: N/A)
+User: WHB1247 (Model Score: N/A)
+User: WSK1857 (Model Score: N/A)
+User: WWW0701 (Model Score: N/A)
+User: ZKP0542 (Model Score: N/A)
+User: VCF1602 (Model Score: N/A)
+User: KSS1005 (Model Score: N/A)
+User: MCP0611 (Model Score: N/A)
+User: TNB1616 (Model Score: N/A)
+User: ZIE0741 (Model Score: N/A)
+User: HXP0976 (Model Score: N/A)
+User: HIS1394 (Model Score: N/A)
+User: JAL0811 (Model Score: N/A)
+User: ITA0159 (Model Score: N/A)
+User: CIF1430 (Model Score: N/A)
+User: RRS0056 (Model Score: N/A)
+User: MDS0680 (Model Score: N/A)
+User: TMT0851 (Model Score: N/A)
+User: OSS1463 (Model Score: N/A)
+User: HSN0675 (Model Score: N/A)
+User: WDT1634 (Model Score: N/A)
+User: OKM1092 (Model Score: N/A)
+User: CKP0630 (Model Score: N/A)
+User: ICB1354 (Model Score: N/A)
+User: TRC1838 (Model Score: N/A)
+User: NAH1366 (Model Score: N/A)
+User: BYO1846 (Model Score: N/A)
+User: GWG0497 (Model Score: N/A)
+User: MGB1235 (Model Score: N/A)
+User: CHP1711 (Model Score: N/A)
+User: SNK1280 (Model Score: N/A)
+User: LVF1626 (Model Score: N/A)
+User: HMS1658 (Model Score: N/A)
+User: DCC1119 (Model Score: N/A)
+User: SIS0042 (Model Score: N/A)
+User: ACA1126 (Model Score: N/A)
+User: CRD0272 (Model Score: N/A)
+User: CWW1120 (Model Score: N/A)
+User: ELM1123 (Model Score: N/A)
+User: GKW0043 (Model Score: N/A)
+User: KCM0466 (Model Score: N/A)
+User: LAH0463 (Model Score: N/A)
+User: MPF0690 (Model Score: N/A)
+User: VRP0267 (Model Score: N/A)
+User: ZEH0685 (Model Score: N/A)
+User: ACM1770 (Model Score: N/A)
+User: AMC1883 (Model Score: N/A)
+User: ASH0298 (Model Score: N/A)
+User: ASH0458 (Model Score: N/A)
+User: BDP0096 (Model Score: N/A)
+User: CBW1826 (Model Score: N/A)
+User: CGF1056 (Model Score: N/A)
+User: CPD1525 (Model Score: N/A)
+User: DIM0330 (Model Score: N/A)
+User: DKG0161 (Model Score: N/A)
+User: DQM0809 (Model Score: N/A)
+User: GCD0194 (Model Score: N/A)
+User: GMB0400 (Model Score: N/A)
+User: HBP1076 (Model Score: N/A)
+User: IRH1224 (Model Score: N/A)
+User: JCC0016 (Model Score: N/A)
+User: JIG1593 (Model Score: N/A)
+User: JMM0613 (Model Score: N/A)
+User: JNR1592 (Model Score: N/A)
+User: KDC0996 (Model Score: N/A)
+User: MJR0711 (Model Score: N/A)
+User: MTP1582 (Model Score: N/A)
+User: NKM1738 (Model Score: N/A)
+User: NKN1405 (Model Score: N/A)
+User: NZL1395 (Model Score: N/A)
+User: OFS0030 (Model Score: N/A)
+User: OHS0036 (Model Score: N/A)
+User: RCG0584 (Model Score: N/A)
+User: WCW1013 (Model Score: N/A)
+User: WOS1834 (Model Score: N/A)
+User: CSF2712 (Model Score: N/A)
+User: JPH1910 (Model Score: N/A)
+User: HJB0462 (Model Score: N/A)
+User: LJO1360 (Model Score: N/A)
+User: ADC1257 (Model Score: N/A)
+User: ACM2278 (Model Score: N/A)
+User: CMP2946 (Model Score: N/A)
+User: PLJ1771 (Model Score: N/A)
+User: CDE1846 (Model Score: N/A)
+User: MBG3183 (Model Score: N/A)
+
+--- PER-USER RIGOROUS VERDICTS ---
+
+User: AAF0535 | Score: 0.842 | Verdict: CONFIRMED
+User: AAM0658 | Score: 0.828 | Verdict: CONFIRMED
+User: AJR0932 | Score: 0.804 | Verdict: CONFIRMED
+User: AKR0057 | Score: 0.816 | Verdict: CONFIRMED
+User: BBS0039 | Score: 0.866 | Verdict: CONFIRMED
+User: BDV0168 | Score: 0.824 | Verdict: CONFIRMED
+User: BIH0745 | Score: 0.841 | Verdict: CONFIRMED
+User: BSS0369 | Score: 0.899 | Verdict: CONFIRMED
+User: CAH0936 | Score: 0.822 | Verdict: CONFIRMED
+User: CCA0046 | Score: 0.863 | Verdict: CONFIRMED
+User: CCL0068 | Score: 0.809 | Verdict: CONFIRMED
+User: CEJ0109 | Score: 0.830 | Verdict: CONFIRMED
+User: CQW0652 | Score: 0.860 | Verdict: CONFIRMED
+User: CSC0217 | Score: 0.874 | Verdict: CONFIRMED
+User: DCH0843 | Score: 0.840 | Verdict: CONFIRMED
+User: DIB0285 | Score: 0.826 | Verdict: CONFIRMED
+User: DRR0162 | Score: 0.821 | Verdict: CONFIRMED
+User: EDB0714 | Score: 0.848 | Verdict: CONFIRMED
+User: EGD0132 | Score: 0.863 | Verdict: CONFIRMED
+User: EHD0584 | Score: 0.804 | Verdict: CONFIRMED
+User: FMG0527 | Score: 0.806 | Verdict: CONFIRMED
+User: FSC0601 | Score: 0.802 | Verdict: CONFIRMED
+User: FTM0406 | Score: 0.811 | Verdict: CONFIRMED
+User: GHL0460 | Score: 0.836 | Verdict: CONFIRMED
+User: GTD0219 | Score: 0.869 | Verdict: CONFIRMED
+User: HBO0413 | Score: 0.807 | Verdict: CONFIRMED
+User: HXL0968 | Score: 0.881 | Verdict: CONFIRMED
+User: IJM0776 | Score: 0.840 | Verdict: CONFIRMED
+User: IKR0401 | Score: 0.826 | Verdict: CONFIRMED
+User: IUB0565 | Score: 0.825 | Verdict: CONFIRMED
+User: JGT0221 | Score: 0.875 | Verdict: CONFIRMED
+User: JJM0203 | Score: 0.818 | Verdict: CONFIRMED
+User: JLM0364 | Score: 0.864 | Verdict: CONFIRMED
+User: JMB0308 | Score: 0.801 | Verdict: CONFIRMED
+User: JRG0207 | Score: 0.829 | Verdict: CONFIRMED
+User: JTM0223 | Score: 0.857 | Verdict: CONFIRMED
+User: KLH0596 | Score: 0.802 | Verdict: CONFIRMED
+User: KPC0073 | Score: 0.803 | Verdict: CONFIRMED
+User: KRL0501 | Score: 0.809 | Verdict: CONFIRMED
+User: LCC0819 | Score: 0.860 | Verdict: CONFIRMED
+User: LJR0523 | Score: 0.817 | Verdict: CONFIRMED
+User: LQC0479 | Score: 0.818 | Verdict: CONFIRMED
+User: MAR0955 | Score: 0.835 | Verdict: CONFIRMED
+User: MAS0025 | Score: 0.811 | Verdict: CONFIRMED
+User: MCF0600 | Score: 0.839 | Verdict: CONFIRMED
+User: MDH0580 | Score: 0.857 | Verdict: CONFIRMED
+User: MOS0047 | Score: 0.887 | Verdict: CONFIRMED
+User: MPM0220 | Score: 0.840 | Verdict: CONFIRMED
+User: MSO0222 | Score: 0.905 | Verdict: CONFIRMED
+User: MYD0978 | Score: 0.821 | Verdict: CONFIRMED
+User: NWT0098 | Score: 0.810 | Verdict: CONFIRMED
+User: PNL0301 | Score: 0.859 | Verdict: CONFIRMED
+User: PSF0133 | Score: 0.862 | Verdict: CONFIRMED
+User: RAB0589 | Score: 0.815 | Verdict: CONFIRMED
+User: RAR0725 | Score: 0.867 | Verdict: CONFIRMED
+User: RHL0992 | Score: 0.845 | Verdict: CONFIRMED
+User: RKD0604 | Score: 0.820 | Verdict: CONFIRMED
+User: RMW0542 | Score: 0.839 | Verdict: CONFIRMED
+User: TNM0961 | Score: 0.834 | Verdict: CONFIRMED
+User: VSS0154 | Score: 0.838 | Verdict: CONFIRMED
+User: XHW0498 | Score: 0.828 | Verdict: CONFIRMED

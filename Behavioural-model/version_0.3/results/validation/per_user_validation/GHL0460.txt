@@ -1,0 +1,5 @@
+User Evaluation: GHL0460
+Verdict: CONFIRMED
+Risk Score: 0.836
+
+No observable document mapping log found.

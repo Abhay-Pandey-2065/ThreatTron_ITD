@@ -1,0 +1,5 @@
+User Evaluation: CQW0652
+Verdict: CONFIRMED
+Risk Score: 0.860
+
+No observable document mapping log found.

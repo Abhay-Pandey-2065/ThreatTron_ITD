@@ -1,0 +1,5 @@
+User Evaluation: MOS0047
+Verdict: CONFIRMED
+Risk Score: 0.887
+
+No observable document mapping log found.

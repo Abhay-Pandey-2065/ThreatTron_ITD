@@ -1,0 +1,5 @@
+User Evaluation: JGT0221
+Verdict: CONFIRMED
+Risk Score: 0.875
+
+No observable document mapping log found.

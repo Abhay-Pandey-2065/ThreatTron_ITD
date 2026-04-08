@@ -1,0 +1,5 @@
+User Evaluation: EGD0132
+Verdict: CONFIRMED
+Risk Score: 0.863
+
+No observable document mapping log found.

@@ -1,0 +1,5 @@
+User Evaluation: RAR0725
+Verdict: CONFIRMED
+Risk Score: 0.867
+
+No observable document mapping log found.

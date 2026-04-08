@@ -1,0 +1,5 @@
+User Evaluation: RKD0604
+Verdict: CONFIRMED
+Risk Score: 0.820
+
+No observable document mapping log found.

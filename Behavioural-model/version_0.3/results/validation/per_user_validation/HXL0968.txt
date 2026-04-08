@@ -1,0 +1,5 @@
+User Evaluation: HXL0968
+Verdict: CONFIRMED
+Risk Score: 0.881
+
+No observable document mapping log found.

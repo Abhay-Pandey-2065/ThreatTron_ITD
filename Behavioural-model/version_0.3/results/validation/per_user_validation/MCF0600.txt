@@ -1,0 +1,5 @@
+User Evaluation: MCF0600
+Verdict: CONFIRMED
+Risk Score: 0.839
+
+No observable document mapping log found.

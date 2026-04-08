@@ -1,0 +1,5 @@
+User Evaluation: NWT0098
+Verdict: CONFIRMED
+Risk Score: 0.810
+
+No observable document mapping log found.

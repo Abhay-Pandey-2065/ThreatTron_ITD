@@ -1,0 +1,20 @@
+paths:
+  data_dir: "c:/Engineering/PBL-2/Dataset/r4.2/r4.2"
+  answers_dir: "c:/Engineering/PBL-2/answers"
+  insiders_csv: "c:/Engineering/PBL-2/answers/insiders.csv"
+  processed_data_dir: "data"
+  models_dir: "models"
+  results_dir: "results"
+
+pipeline:
+  train_models: true
+  chunk_size: 500000
+
+weights:
+  lightgbm: 0.5
+  random_forest: 0.2
+  logistic: 0.1
+  anomaly: 0.2
+
+thresholds:
+  risk_score: 0.8
