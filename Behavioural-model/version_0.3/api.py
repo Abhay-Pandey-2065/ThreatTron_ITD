@@ -35,26 +35,6 @@ except Exception as e:
     print(f"[-] CRITICAL ERROR: {e}")
     raise e
 
-
-# -----------------------------
-# 🟢 HEALTH ENDPOINT
-# -----------------------------
-@app.route('/', methods=['GET'])
-def health():
-    return jsonify({"status": "alive"})
-
-
-# -----------------------------
-# 🟢 STATUS ENDPOINT
-# -----------------------------
-@app.route('/status', methods=['GET'])
-def status():
-    return jsonify({
-        "status": "running",
-        "uptime_seconds": int(time.time() - START_TIME)
-    })
-
-
 # -----------------------------
 # ⚡ PARALLEL MODEL INFERENCE
 # -----------------------------
