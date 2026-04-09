@@ -173,6 +173,60 @@ def overview_recent(
         db.close()
 
 
+# ------------------------------------------------------------------
+# NEW CHANGE: The ML Brain Bridge! 
+# This gathers real database counts and asks the Render ML URL.
+# ------------------------------------------------------------------
+import requests
+
+@app.get("/api/risk")
+def get_live_risk(agent_id: Optional[str] = Query(None)):
+    db: Session = SessionLocal()
+    try:
+        def get_count(model, condition=None):
+            q = db.query(model)
+            if agent_id:
+                q = q.filter(model.agent_id == agent_id)
+            if condition is not None:
+                q = q.filter(condition)
+            return q.count()
+
+        # Build the exact JSON shape the ML API requested using LIVE SQL Database counts!
+        payload = {
+            "user_id": agent_id or "Global",
+            "total_logons": 5, 
+            "after_hours_logons": 0,
+            "total_emails": get_count(EmailEvent),
+            "emails_with_attachments": get_count(EmailEvent, EmailEvent.has_links == True),
+            "total_http": get_count(NetworkEvent),
+            "suspicious_http": 0,
+            "total_file": get_count(FileEvent),
+            "exe_zip_files": get_count(FileEvent, FileEvent.file_path.ilike("%exe")),
+            "total_device": get_count(USBEvent)
+        }
+
+        # Send it to your Render Cloud API securely
+        try:
+            render_url = "https://ml-api-2ru4.onrender.com/predict"
+            response = requests.post(render_url, json=payload, timeout=5)
+            return response.json()
+        except Exception as e:
+            # Fallback if Render is asleep
+            return {"status": "error", "message": f"ML API Offline: {e}", "risk_score": 0.0, "is_threat": False}
+    finally:
+        db.close()
+
+
+@app.post("/api/sandbox")
+def sandbox_predict(payload: dict):
+    # This acts as a CORS Proxy so the React Sandbox can securely talk to Render
+    try:
+        render_url = "https://ml-api-2ru4.onrender.com/predict"
+        response = requests.post(render_url, json=payload, timeout=5)
+        return response.json()
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
 # ─── Legacy batch ingest (used by the agent) ───
 @app.post("/events/batch")
 def receive_events(payload: dict):

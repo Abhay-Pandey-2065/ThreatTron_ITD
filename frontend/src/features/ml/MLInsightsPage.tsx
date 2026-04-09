@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { MLSandbox } from './MLSandbox'
+import { MLLiveRiskGauge } from './MLLiveRiskGauge'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { MlInsightDrawer } from './MlInsightDrawer'
 import { MlInsightTable } from './MlInsightTable'
@@ -90,16 +92,18 @@ export function MLInsightsPage() {
         )}
       </section>
 
-      <section className="tt-dash__section" aria-labelledby="ml-viz-heading">
-        <h2 id="ml-viz-heading" className="tt-dash__h2">
-          Trends
+      <section className="tt-dash__section" aria-labelledby="ml-live-heading">
+        <h2 id="ml-live-heading" className="tt-dash__h2">
+          Live Threat Assessment
         </h2>
-        <div className="tt-chart-placeholder">
-          <p className="tt-dash__muted">
-            Timelines and distributions for scores / anomalies will appear when the API returns series
-            data.
-          </p>
-        </div>
+        <MLLiveRiskGauge agentId={agentFilter || "Global"} />
+      </section>
+
+      <section className="tt-dash__section" aria-labelledby="ml-sandbox-heading">
+        <h2 id="ml-sandbox-heading" className="tt-dash__h2">
+          AI Testing Sandbox (Render Cloud API)
+        </h2>
+        <MLSandbox />
       </section>
 
       <MlInsightDrawer insight={selectedInsight} open={drawerOpen} onClose={() => setDrawerOpen(false)} />

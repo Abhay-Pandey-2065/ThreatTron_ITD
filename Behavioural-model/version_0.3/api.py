@@ -145,8 +145,20 @@ def cached_predict(tuple_input):
 # -----------------------------
 # 🔥 MAIN API
 # -----------------------------
-@app.route('/predict', methods=['POST'])
+@app.route('/predict', methods=['POST', 'OPTIONS'])
 def predict():
+    # -----------------------------
+    # 🔓 CORS BYPASS HACK
+    # This officially permits Google Chrome
+    # to communicate with Render across domains!
+    # -----------------------------
+    if request.method == 'OPTIONS':
+        return '', 204, {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST',
+            'Access-Control-Allow-Headers': 'Content-Type'
+        }
+
     try:
         data = request.json
         user_id = data.get("user_id", "Unknown")
@@ -156,7 +168,7 @@ def predict():
 
         result = cached_predict(tuple_input)
 
-        return jsonify({
+        response = jsonify({
             "user_id": user_id,
             "risk_score": result["risk_score"],
             "is_threat": result["is_threat"],
@@ -166,9 +178,14 @@ def predict():
             },
             "status": "success"
         })
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 400
+        response = jsonify({"status": "error", "message": str(e)})
+        response.status_code = 400
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        return response
 
 
 # -----------------------------
