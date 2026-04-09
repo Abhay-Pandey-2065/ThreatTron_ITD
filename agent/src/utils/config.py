@@ -18,5 +18,5 @@ def on_agent_start(event_callback):
     event_callback(event)
 
 MONITORED_DIRECTORIES = {
-    r"C:\Users\ADMIN\Downloads\New folder"
+    r"C:\Users\abhil\Downloads"
 }
