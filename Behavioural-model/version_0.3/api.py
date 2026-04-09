@@ -62,20 +62,24 @@ def run_models(X):
 def cached_predict(tuple_input):
     data = dict(tuple_input)
 
-    # Base metrics
+    # Base metrics — now includes the 3 fields that were missing vs training pipeline
     base = {
-        'total_logons': data.get('total_logons', 0),
-        'after_hours_logons': data.get('after_hours_logons', 0),
-        'total_emails': data.get('total_emails', 0),
-        'emails_with_attachments': data.get('emails_with_attachments', 0),
-        'total_http': data.get('total_http', 0),
-        'suspicious_http': data.get('suspicious_http', 0),
-        'total_file': data.get('total_file', 0),
-        'exe_zip_files': data.get('exe_zip_files', 0),
-        'total_device': data.get('total_device', 0)
+        'total_logons':              data.get('total_logons', 0),
+        'after_hours_logons':        data.get('after_hours_logons', 0),
+        # FIX: weekend_logons & failed_logons were used in training but never sent here
+        'weekend_logons':            data.get('weekend_logons', 0),
+        'failed_logons':             data.get('failed_logons', 0),
+        'total_emails':              data.get('total_emails', 0),
+        'emails_with_attachments':   data.get('emails_with_attachments', 0),
+        # FIX: external_emails was THE key exfiltration feature in training — always 0 before!
+        'external_emails':           data.get('external_emails', 0),
+        'total_http':                data.get('total_http', 0),
+        'suspicious_http':           data.get('suspicious_http', 0),
+        'total_file':                data.get('total_file', 0),
+        'exe_zip_files':             data.get('exe_zip_files', 0),
+        'total_device':              data.get('total_device', 0),
     }
 
-    # Feature engineering
     eps = 1.0
     tot_actions = sum([
         base['total_logons'], base['total_emails'],
@@ -85,49 +89,56 @@ def cached_predict(tuple_input):
 
     engineered = base.copy()
     engineered['total_actions'] = tot_actions
-    engineered['after_hours_ratio'] = base['after_hours_logons'] / (base['total_logons'] + eps)
-    engineered['attachment_ratio'] = base['emails_with_attachments'] / (base['total_emails'] + eps)
-    engineered['suspicious_file_ratio'] = base['exe_zip_files'] / (base['total_file'] + eps)
-    engineered['suspicious_http_ratio'] = base['suspicious_http'] / (base['total_http'] + eps)
-    engineered['device_action_ratio'] = base['total_device'] / safe_actions
 
+    # 1. Temporal Anomalies — matches 02_feature_engineering.py lines 29-31
+    engineered['after_hours_ratio']       = base['after_hours_logons'] / (base['total_logons'] + eps)
+    engineered['weekend_activity_ratio']  = base['weekend_logons']     / (base['total_logons'] + eps)  # FIX: was missing
+    engineered['failed_logon_ratio']      = base['failed_logons']      / (base['total_logons'] + eps)  # FIX: was missing
+
+    # 2. Exfiltration Risk — matches lines 34-35
+    engineered['attachment_ratio']        = base['emails_with_attachments'] / (base['total_emails'] + eps)
+    engineered['external_email_ratio']    = base['external_emails']         / (base['total_emails'] + eps)  # FIX: was missing
+
+    # 3. Payload & Lateral — matches lines 38-40
+    engineered['suspicious_file_ratio']   = base['exe_zip_files']    / (base['total_file']  + eps)
+    engineered['suspicious_http_ratio']   = base['suspicious_http']  / (base['total_http']  + eps)
+    engineered['device_action_ratio']     = base['total_device']     / safe_actions
+
+    # 4. Composite Ratios — matches lines 43-45
+    # FIX: external_emails was missing from this sum before — it is critical!
     tot_flags = (
         base['after_hours_logons'] +
         base['emails_with_attachments'] +
         base['exe_zip_files'] +
-        base['suspicious_http']
-    )
-
-    engineered['total_suspicious_flags'] = tot_flags
-    engineered['overall_suspicious_ratio'] = tot_flags / safe_actions
-    engineered['exfiltration_intensity'] = (
         base['suspicious_http'] +
-        base['emails_with_attachments'] +
+        base['external_emails']          # FIX: was missing
+    )
+    engineered['total_suspicious_flags']  = tot_flags
+    engineered['overall_suspicious_ratio'] = tot_flags / safe_actions
+
+    # 5. Heavy Intensity — matches lines 48-49
+    # FIX: formula previously used emails_with_attachments; training used external_emails
+    engineered['exfiltration_intensity']  = (
+        base['suspicious_http'] +
+        base['external_emails'] +        # FIX: was emails_with_attachments — wrong!
         base['total_device']
     ) / safe_actions
     engineered['activity_intensity'] = tot_actions
 
-    # -----------------------------
-    # ⚡ NUMPY INSTEAD OF PANDAS
-    # -----------------------------
+    # Build strictly ordered feature vector to match the scaler's training shape
     feature_vector = [engineered.get(col, 0) for col in feature_schema]
     X = np.array([feature_vector])
-
     X_scaled = scaler.transform(X)
 
-    # -----------------------------
-    # ⚡ PARALLEL MODELS
-    # -----------------------------
     lgb, rf, lr, iso_out = run_models(X_scaled)
 
     iso_score = np.clip((-iso_out - 0.3) / 0.5, 0.0, 1.0)
 
-    # Ensemble
     w = config['weights']
     final_risk = (
         (lgb * w['lightgbm']) +
-        (rf * w['random_forest']) +
-        (lr * w['logistic']) +
+        (rf  * w['random_forest']) +
+        (lr  * w['logistic']) +
         (iso_score * w['anomaly'])
     )
 
@@ -136,10 +147,11 @@ def cached_predict(tuple_input):
 
     return {
         "risk_score": round(final_risk, 4),
-        "is_threat": is_threat,
-        "lgb": float(lgb),
-        "iso": float(iso_score)
+        "is_threat":  is_threat,
+        "lgb":        float(lgb),
+        "iso":        float(iso_score),
     }
+
 
 
 # -----------------------------
