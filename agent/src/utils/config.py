@@ -1,8 +1,8 @@
+import os
 import uuid
 import platform
-from datetime import datetime
-from utils.session import session as agent_session
 from datetime import datetime, timezone
+from utils.session import session as agent_session
 
 def base_event(event_type: str) -> dict:
     return {
@@ -18,5 +18,22 @@ def on_agent_start(event_callback):
     event_callback(event)
 
 MONITORED_DIRECTORIES = {
-    r"C:\Users\ADMIN\Downloads\New folder"
+    r"D:\Personal_Projects"
 }
+
+
+# def get_monitored_directories() -> set:
+#     """Return all mounted root directories for the current system."""
+#     if platform.system() == "Windows":
+#         try:
+#             import psutil
+#             drives = {partition.mountpoint for partition in psutil.disk_partitions(all=False) if partition.mountpoint}
+#             if drives:
+#                 return drives
+#         except Exception:
+#             pass
+#         return {r"C:\\"}
+
+#     return {os.path.abspath(os.sep)}
+
+# MONITORED_DIRECTORIES = get_monitored_directories()
