@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import classification_report, accuracy_score
 
-df = pd.read_csv("datasets/enron_spam_dataset.csv")
+df = pd.read_csv("dataset/enron_spam_data.csv")
 
 df = df.dropna(subset=["Subject", "Message", "Spam/Ham"])
 

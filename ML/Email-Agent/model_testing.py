@@ -3,8 +3,7 @@ import pandas as pd
 
 model = joblib.load("phishing_model.pkl")
 
-# Optional: load dataset for realistic examples
-df = pd.read_csv("datasets/enron_spam_dataset.csv")
+df = pd.read_csv("dataset/enron_spam_data.csv")
 
 while True:
     print("\nChoose option:")

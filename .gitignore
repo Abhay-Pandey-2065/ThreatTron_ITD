@@ -16,4 +16,6 @@ token.pickle
 
 .vscode
 
-datasets/
+dataset/
+
+training_debugging.py
