@@ -21,7 +21,7 @@ export function clearAccessToken(): void {
 }
 
 export function getApiBaseUrl(): string {
-  const base = import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? ''
+  const base = (import.meta.env.VITE_API_URL?.replace(/\/$/, '') ?? 'http://127.0.0.1:8000').trim()
   return base
 }
 

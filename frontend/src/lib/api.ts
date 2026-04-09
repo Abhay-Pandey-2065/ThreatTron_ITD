@@ -1,6 +1,5 @@
 /**
  * API client for telemetry and domain endpoints.
- * Backend read APIs (GET) are not yet implemented; calls will 404 and UI shows empty/loading states.
  */
 import { getApiBaseUrl, authHeaders } from './apiToken'
 
@@ -49,6 +48,9 @@ export interface ProcessEventRow {
   timestamp: string
   process_name: string | null
   exe_path: string | null
+  parent_name: string | null
+  parent_pid: number | null
+  suspicious_spawn: boolean | null
 }
 
 export interface SystemEventRow {
@@ -66,7 +68,7 @@ export interface EmailEventRow {
   sender: string | null
   subject: string | null
   snippet_length: number | null
-  has_links: string | null
+  has_links: boolean | null
 }
 
 export interface USBEventRow {
@@ -75,6 +77,19 @@ export interface USBEventRow {
   event_type: string
   timestamp: string
   mountpoint: string | null
+}
+
+export interface NetworkEventRow {
+  id: number
+  agent_id: string
+  timestamp: string
+  local_ip_hash: string | null
+  local_port: number | null
+  remote_ip_hash: string | null
+  remote_port: number | null
+  status: string | null
+  pid: number | null
+  process_name: string | null
 }
 
 export interface EventsQuery {
@@ -94,7 +109,6 @@ function buildQuery(params: EventsQuery): string {
   return q ? `?${q}` : ''
 }
 
-/** GET /api/events/files — returns [] when API unavailable (HTML/404 response) */
 export async function fetchFileEvents(q: EventsQuery): Promise<FileEventRow[]> {
   try {
     const data = await fetchJson<{ items?: FileEventRow[]; events?: FileEventRow[] }>(
@@ -106,7 +120,6 @@ export async function fetchFileEvents(q: EventsQuery): Promise<FileEventRow[]> {
   }
 }
 
-/** GET /api/events/processes */
 export async function fetchProcessEvents(q: EventsQuery): Promise<ProcessEventRow[]> {
   try {
     const data = await fetchJson<{ items?: ProcessEventRow[]; events?: ProcessEventRow[] }>(
@@ -118,7 +131,6 @@ export async function fetchProcessEvents(q: EventsQuery): Promise<ProcessEventRo
   }
 }
 
-/** GET /api/events/system */
 export async function fetchSystemEvents(q: EventsQuery): Promise<SystemEventRow[]> {
   try {
     const data = await fetchJson<{ items?: SystemEventRow[]; events?: SystemEventRow[] }>(
@@ -130,7 +142,6 @@ export async function fetchSystemEvents(q: EventsQuery): Promise<SystemEventRow[
   }
 }
 
-/** GET /api/events/emails */
 export async function fetchEmailEvents(q: EventsQuery): Promise<EmailEventRow[]> {
   try {
     const data = await fetchJson<{ items?: EmailEventRow[]; events?: EmailEventRow[] }>(
@@ -142,11 +153,21 @@ export async function fetchEmailEvents(q: EventsQuery): Promise<EmailEventRow[]>
   }
 }
 
-/** GET /api/events/usb */
 export async function fetchUSBEvents(q: EventsQuery): Promise<USBEventRow[]> {
   try {
     const data = await fetchJson<{ items?: USBEventRow[]; events?: USBEventRow[] }>(
       `/api/events/usb${buildQuery(q)}`,
+    )
+    return data.items ?? data.events ?? []
+  } catch {
+    return []
+  }
+}
+
+export async function fetchNetworkEvents(q: EventsQuery): Promise<NetworkEventRow[]> {
+  try {
+    const data = await fetchJson<{ items?: NetworkEventRow[]; events?: NetworkEventRow[] }>(
+      `/api/events/network${buildQuery(q)}`,
     )
     return data.items ?? data.events ?? []
   } catch {
@@ -160,17 +181,16 @@ export interface OverviewStats {
   active_agents?: number
 }
 
-/** GET /api/overview/stats — returns null when API unavailable */
-export async function fetchOverviewStats(_q: EventsQuery): Promise<OverviewStats | null> {
+export async function fetchOverviewStats(q: EventsQuery): Promise<OverviewStats | null> {
   try {
-    return await fetchJson<OverviewStats | null>('/api/overview/stats')
+    return await fetchJson<OverviewStats | null>(`/api/overview/stats${buildQuery(q)}`)
   } catch {
     return null
   }
 }
 
 export interface RecentEvent {
-  type: 'file' | 'process' | 'system' | 'email' | 'usb'
+  type: 'file' | 'process' | 'system' | 'email' | 'usb' | 'network'
   id: number
   agent_id: string
   timestamp: string
@@ -178,7 +198,6 @@ export interface RecentEvent {
   ml_flagged?: boolean
 }
 
-/** GET /api/overview/recent — returns [] when API unavailable */
 export async function fetchRecentEvents(q: EventsQuery): Promise<RecentEvent[]> {
   try {
     const data = await fetchJson<{ items?: RecentEvent[]; events?: RecentEvent[] }>(
@@ -223,7 +242,6 @@ export interface MlInsightsResponse {
   meta?: { total?: number }
 }
 
-/** GET /ml/summary — returns null when API unavailable */
 export async function fetchMlSummary(q: EventsQuery): Promise<MlSummary | null> {
   try {
     return await fetchJson<MlSummary | null>(`/ml/summary${buildQuery(q)}`)
@@ -232,7 +250,6 @@ export async function fetchMlSummary(q: EventsQuery): Promise<MlSummary | null> 
   }
 }
 
-/** GET /ml/insights — returns [] when API unavailable */
 export async function fetchMlInsights(q: EventsQuery): Promise<MlInsight[]> {
   try {
     const data = await fetchJson<MlInsightsResponse | MlInsight[]>(

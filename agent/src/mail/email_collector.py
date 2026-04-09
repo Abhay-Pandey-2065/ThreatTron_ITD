@@ -19,7 +19,7 @@ class GmailCollector:
         creds = None
 
         if os.path.exists(TOKEN_PATH):
-            with open("token.pickle", "rb") as token:
+            with open(TOKEN_PATH, "rb") as token:
                 creds = pickle.load(token)
 
         if creds and creds.expired and creds.refresh_token:
