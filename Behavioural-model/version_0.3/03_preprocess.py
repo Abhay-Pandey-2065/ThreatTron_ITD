@@ -29,7 +29,7 @@ def run():
     # All remaining features are purely numeric behavioral signals.
     
     # 4. Percentile Clipping (Protect Scalers)
-    numeric_columns = [c for c in df.columns if c not in ['user_id', 'label'] and c not in categorical_cols]
+    numeric_columns = [c for c in df.columns if c not in ['user_id', 'label']]
     
     # We only apply clipping to the continuous floats, not the boolean 0/1 dummies
     for col in numeric_columns:
