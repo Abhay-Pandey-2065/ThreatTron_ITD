@@ -3,6 +3,9 @@ from database import SessionLocal
 from models import EmailEvent
 from datetime import datetime, timedelta, timezone
 from typing import Optional
+from pydantic import BaseModel
+import os
+import requests
 
 router = APIRouter()
 
@@ -41,3 +44,23 @@ def receive_email_events(events: list):
     db.commit()
     db.close()
     return {"status": "email events stored"}
+
+class AnalyzeEmailRequest(BaseModel):
+    subject: str = ""
+    message: str = ""
+    sender: str = ""
+    urls: str = ""
+
+@router.post("/analyze")
+def analyze_email(req: AnalyzeEmailRequest):
+    ml_url = os.environ.get("THREATTRON_EMAIL_ML_URL", "http://127.0.0.1:8001/predict")
+    try:
+        response = requests.post(
+            ml_url, 
+            json={"subject": req.subject, "message": req.message, "sender": req.sender, "urls": req.urls},
+            timeout=10
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": str(e), "classification": "Unknown", "risk_score": 0.0}
