@@ -19,7 +19,7 @@ try:
     scaler = joblib.load(os.path.join(models_dir, 'scaler.pkl'))
     lgb_model = joblib.load(os.path.join(models_dir, 'v1_lightgbm.pkl'))
     rf_model = joblib.load(os.path.join(models_dir, 'v1_rf.pkl'))
-    # lr_model = joblib.load(os.path.join(models_dir, 'v1_logistic.pkl')) # Disabled due to Scikit-Learn 1.8.0 versioning bug on AWS
+    lr_model = joblib.load(os.path.join(models_dir, 'v1_logistic.pkl'))
     iso_model = joblib.load(os.path.join(models_dir, 'v1_isolation.pkl'))
     print("[+] All AI models loaded into memory successfully.")
 except Exception as e:
@@ -73,7 +73,7 @@ def predict():
         
         lgb_score = lgb_model.predict_proba(X_scaled)[0, 1]
         rf_score = rf_model.predict_proba(X_scaled)[0, 1]
-        lr_score = 0.0 # Disabled
+        lr_score = lr_model.predict_proba(X_scaled)[0, 1]
         
         iso_out = iso_model.score_samples(X_scaled)[0]
         # Normalize Identity Forest negative scores to a rough 0-1 scale
