@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
 
 const FIELD_META: Record<string, { label: string; icon: string; description: string }> = {
-  user_id:                  { label: 'User ID',                   icon: '👤', description: 'Employee identifier' },
-  total_logons:             { label: 'Total Logons',              icon: '🔑', description: 'Total login events recorded' },
-  after_hours_logons:       { label: 'After-Hours Logons',        icon: '🌙', description: 'Logins outside working hours' },
-  total_emails:             { label: 'Total Emails',              icon: '📧', description: 'Total emails sent' },
-  emails_with_attachments:  { label: 'Emails w/ Attachments',     icon: '📎', description: 'Emails carrying attachments' },
-  total_http:               { label: 'Total HTTP Requests',       icon: '🌐', description: 'Total outbound web traffic' },
-  suspicious_http:          { label: 'Suspicious HTTP',           icon: '⚠️', description: 'Requests to flagged domains' },
-  total_file:               { label: 'Total File Ops',            icon: '📁', description: 'Total file read/write/move events' },
-  exe_zip_files:            { label: 'EXE / ZIP Files',           icon: '🗜️', description: 'Executable or archive file events' },
-  total_device:             { label: 'USB Device Events',         icon: '💾', description: 'External device connections' },
+  total_logons:                 { label: 'Total Logons',              icon: '🔑', description: 'Total login events' },
+  after_hours_logons:           { label: 'After-Hours Logons',        icon: '🌙', description: 'Logins outside 6AM-7PM' },
+  weekend_logons:               { label: 'Weekend Logons',            icon: '🏖️', description: 'Logins on Sat/Sun' },
+  failed_logons:                { label: 'Failed Logons',             icon: '❌', description: 'Failed auth attempts' },
+  total_emails:                 { label: 'Total Emails',              icon: '📧', description: 'Outbound email count' },
+  emails_with_attachments:      { label: 'Emails w/ Attachments',     icon: '📎', description: 'Emails carrying files' },
+  external_emails:              { label: 'External Emails',           icon: '📤', description: 'Sent outside company domain' },
+  total_email_megabytes:        { label: 'Total Email MB',            icon: '📦', description: 'Total attachment volume in MB' },
+  total_http:                   { label: 'Total Web Hits',            icon: '🌐', description: 'Total outbound requests' },
+  suspicious_http:              { label: 'Suspicious Web',            icon: '⚠️', description: 'Visits to file-sharing/hacking sites' },
+  total_file:                   { label: 'Total File Ops',            icon: '📁', description: 'File read/write/move events' },
+  exe_zip_files:                { label: 'EXE / ZIP Ops',             icon: '🗜️', description: 'Executable or archive files' },
+  after_hours_file_ops:         { label: 'Night File Ops',            icon: '🕛', description: 'Files touched off-hours' },
+  total_device:                 { label: 'USB Device Events',         icon: '💾', description: 'External drive mount events' },
+  num_distinct_pcs:             { label: 'Distinct PCs Used',         icon: '💻', description: 'Number of machines logged into' },
+  unique_http_domains:          { label: 'Unique Web Domains',        icon: '🌍', description: 'Total different sites visited' },
+  unique_external_recipients:   { label: 'External Recipients',       icon: '👥', description: 'Unique external email addresses' },
 };
 
 const PRESETS = {
-  Normal:     { user_id: 'EMP_001', total_logons: 8,   after_hours_logons: 0,  weekend_logons: 0,  failed_logons: 1,  total_emails: 20,   emails_with_attachments: 2,   external_emails: 1,   total_http: 4000,  suspicious_http: 1,  total_file: 80,   exe_zip_files: 0,  total_device: 0 },
-  Suspicious: { user_id: 'EMP_042', total_logons: 15,  after_hours_logons: 5,  weekend_logons: 3,  failed_logons: 4,  total_emails: 40,   emails_with_attachments: 12,  external_emails: 18,  total_http: 10500, suspicious_http: 18, total_file: 200,  exe_zip_files: 4,  total_device: 2 },
-  Critical:   { user_id: 'EMP_099', total_logons: 120, after_hours_logons: 80, weekend_logons: 40, failed_logons: 25, total_emails: 5000, emails_with_attachments: 3000, external_emails: 4200, total_http: 90000, suspicious_http: 8000, total_file: 45000, exe_zip_files: 2000, total_device: 15 },
+  Normal:     { total_logons: 8,   after_hours_logons: 0,  weekend_logons: 0, failed_logons: 1,  total_emails: 20,   emails_with_attachments: 2,   external_emails: 1,   total_email_megabytes: 0,  total_http: 4000,  suspicious_http: 1,    total_file: 80,    exe_zip_files: 0,   after_hours_file_ops: 0,  total_device: 0, num_distinct_pcs: 1, unique_http_domains: 5,   unique_external_recipients: 1 },
+  Suspicious: { total_logons: 15,  after_hours_logons: 5,  weekend_logons: 0, failed_logons: 4,  total_emails: 40,   emails_with_attachments: 12,  external_emails: 18,  total_email_megabytes: 25, total_http: 10500, suspicious_http: 18,   total_file: 200,   exe_zip_files: 4,   after_hours_file_ops: 10, total_device: 1, num_distinct_pcs: 2, unique_http_domains: 45,  unique_external_recipients: 8 },
+  Critical:   { total_logons: 60,  after_hours_logons: 45, weekend_logons: 0, failed_logons: 12, total_emails: 105,  emails_with_attachments: 80,  external_emails: 95,  total_email_megabytes: 350,total_http: 25000, suspicious_http: 1150, total_file: 45000, exe_zip_files: 100, after_hours_file_ops: 8000,total_device: 5, num_distinct_pcs: 4, unique_http_domains: 120, unique_external_recipients: 40 },
 };
 
 type PresetKey = keyof typeof PRESETS;
@@ -225,19 +232,39 @@ export function MLSandbox() {
                   <>
                     <RiskMeter score={result.risk_score} />
                     <div style={{ borderTop: '1px solid #1a1a1a', marginTop: 16, paddingTop: 16 }}>
-                      <div style={{ fontSize: 12, color: '#555', marginBottom: 12, letterSpacing: '0.8px', textTransform: 'uppercase' }}>Model Sub-Scores</div>
+                      
+                      {/* Rules Fired */}
+                      {result.rules_triggered && result.rules_triggered.length > 0 && (
+                        <div style={{ marginBottom: 16 }}>
+                          <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase' }}>
+                            🚨 Behavioral Rules Triggered
+                          </div>
+                          {result.rules_triggered.map((rule: string) => (
+                            <div key={rule} style={{ padding: '4px 8px', background: '#f59e0b1a', color: '#f59e0b', border: '1px solid #f59e0b33', borderRadius: 4, fontSize: 12, display: 'inline-block', marginRight: 8, marginBottom: 8 }}>
+                                {rule}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                        <div style={{ background: '#141414', padding: '10px', borderRadius: 8, border: '1px solid #1e1e1e' }}>
+                           <div style={{ fontSize: 11, color: '#555', marginBottom: 4 }}>ML AI SCORE</div>
+                           <div style={{ fontSize: 16, color: '#6366f1', fontWeight: 600 }}>{result?.ml_score?.toFixed(3) ?? '—'}</div>
+                        </div>
+                        <div style={{ background: '#141414', padding: '10px', borderRadius: 8, border: '1px solid #1e1e1e' }}>
+                           <div style={{ fontSize: 11, color: '#555', marginBottom: 4 }}>RULE ENGINE SCORE</div>
+                           <div style={{ fontSize: 16, color: '#f59e0b', fontWeight: 600 }}>{result?.rule_score?.toFixed(3) ?? '—'}</div>
+                        </div>
+                      </div>
+
+                      <div style={{ fontSize: 11, color: '#555', marginBottom: 10, letterSpacing: '0.8px', textTransform: 'uppercase' }}>ML Confidence (Under the hood)</div>
                       <SubScoreBar label="🌲 LightGBM Gradient Boosting" value={result.sub_scores.lightgbm_confidence} color="#6366f1" />
-                      <SubScoreBar label="🔍 Isolation Forest Anomaly" value={result.sub_scores.anomaly_confidence} color="#f59e0b" />
+                      <SubScoreBar label="🔍 Isolation Forest Anomaly" value={result.sub_scores.anomaly_confidence} color="#a78bfa" />
                     </div>
-                    <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                      <div style={{ flex: 1, background: '#141414', borderRadius: 8, padding: '10px 14px', border: '1px solid #1e1e1e' }}>
-                        <div style={{ fontSize: 11, color: '#555', marginBottom: 4 }}>TARGET USER</div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#ccc' }}>{result.user_id}</div>
-                      </div>
-                      <div style={{ flex: 1, background: '#141414', borderRadius: 8, padding: '10px 14px', border: '1px solid #1e1e1e' }}>
-                        <div style={{ fontSize: 11, color: '#555', marginBottom: 4 }}>API STATUS</div>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: '#22c55e' }}>✓ {result.status}</div>
-                      </div>
+                    
+                    <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12, color: '#22c55e' }}>
+                        ✓ API Connected ({result.status})
                     </div>
                   </>
                 )}
