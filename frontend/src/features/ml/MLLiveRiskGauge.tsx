@@ -1,122 +1,164 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 interface MLLiveRiskGaugeProps {
   agentId?: string;
 }
 
-export function MLLiveRiskGauge({ agentId = "Global" }: MLLiveRiskGaugeProps) {
-  const [riskData, setRiskData] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+interface RiskResponse {
+  user_id?: string;
+  risk_score?: number;
+  is_threat?: boolean;
+  sub_scores?: { lightgbm_confidence: number; anomaly_confidence: number };
+  status?: string;
+  message?: string;
+}
+
+function ArcGauge({ pct, color }: { pct: number; color: string }) {
+  const r = 70;
+  const cx = 90, cy = 90;
+  const circumference = Math.PI * r; // half circle
+  const dash = (pct / 100) * circumference;
+
+  return (
+    <svg width="180" height="100" viewBox="0 0 180 100">
+      {/* Background arc */}
+      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke="#1e1e1e" strokeWidth="12" strokeLinecap="round" />
+      {/* Foreground arc */}
+      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke={color} strokeWidth="12" strokeLinecap="round"
+        strokeDasharray={`${dash} ${circumference}`} style={{ transition: 'stroke-dasharray 1s cubic-bezier(0.4,0,0.2,1), stroke 0.5s' }} />
+      {/* Glow filter */}
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+          <feMerge><feMergeNode in="coloredBlur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+    </svg>
+  );
+}
+
+export function MLLiveRiskGauge({ agentId = 'Global' }: MLLiveRiskGaugeProps) {
+  const [riskData, setRiskData] = useState<RiskResponse | null>(null);
+  const [offline, setOffline] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const [tick, setTick] = useState(0);
 
   useEffect(() => {
     const fetchRisk = async () => {
       try {
-        // Ping the Brain Bridge on the local FastAPI backend!
         const response = await fetch(`http://127.0.0.1:8000/api/risk?agent_id=${agentId}`);
         const data = await response.json();
         setRiskData(data);
-        setError(null);
-      } catch (err) {
-        setError("Cannot reach Backend API. Is Uvicorn running on Port 8000?");
+        setOffline(false);
+        setLastUpdate(new Date());
+      } catch {
+        setOffline(true);
       }
+      setTick(t => t + 1);
     };
-
     fetchRisk();
-    // Refresh the score every 5 seconds to create a real-time tracking illusion
-    const interval = setInterval(fetchRisk, 5000); 
+    const interval = setInterval(fetchRisk, 5000);
     return () => clearInterval(interval);
   }, [agentId]);
 
-  if (error) {
-    return <div style={{ color: '#ff4d4d', padding: '10px', background: '#330000', borderRadius: '4px' }}>⚠️ {error}</div>;
-  }
-  
-  if (!riskData) {
-    return <div style={{ color: '#aaa', padding: '10px' }}>📡 Syncing with AI Brain...</div>;
-  }
+  const score = riskData?.risk_score ?? 0;
+  const pct = Math.min(100, Math.max(0, score * 100));
+  const color = pct < 30 ? '#22c55e' : pct < 65 ? '#f59e0b' : '#ef4444';
+  const label = pct < 30 ? 'SAFE' : pct < 65 ? 'ELEVATED' : 'CRITICAL';
 
-  const score = riskData.risk_score || 0;
-  const percentage = Math.min(100, Math.max(0, score * 100));
-  
-  // Dynamic color scaler: Green -> Yellow -> Red based on the math
-  const getColor = (p: number) => {
-    if (p < 30) return '#00cc66'; // Safe (Green)
-    if (p < 70) return '#ffcc00'; // Warning (Yellow)
-    return '#ff4d4d'; // Danger (Red)
-  };
-
-  const activeColor = getColor(percentage);
+  const nextRefreshIn = 5 - (tick % 5 === 0 ? 5 : tick % 5);
 
   return (
-    <div style={{ 
-      padding: '24px', 
-      background: '#111', 
-      color: '#fff', 
-      borderRadius: '12px', 
-      fontFamily: 'sans-serif',
-      boxShadow: `0 0 20px ${activeColor}33`, // Dynamic glowing shadow
-      transition: 'box-shadow 0.5s ease-in-out'
+    <div style={{
+      background: '#0f0f0f', borderRadius: 14, border: `1px solid ${offline ? '#2a1a1a' : '#1e1e1e'}`,
+      overflow: 'hidden', fontFamily: "'Inter', 'Segoe UI', sans-serif", color: '#e5e5e5',
+      boxShadow: offline ? 'none' : `0 0 30px ${color}18`, transition: 'box-shadow 0.5s',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ margin: 0, fontSize: '18px', color: '#ccc' }}>Real-Time Threat Monitor</h3>
-        <div style={{ 
-          padding: '6px 16px', 
-          borderRadius: '20px', 
-          background: riskData.is_threat ? '#ffe6e6' : '#e6ffe6',
-          color: riskData.is_threat ? '#ff4d4d' : '#00cc66',
-          fontWeight: 'bold',
-          textTransform: 'uppercase',
-          letterSpacing: '1px',
-          fontSize: '12px'
-        }}>
-          {riskData.is_threat ? "CRITICAL THREAT" : "SAFE"}
-        </div>
-      </div>
-
-      <div style={{ textAlign: 'center', margin: '30px 0' }}>
-        <h1 style={{ 
-          fontSize: '64px', 
-          margin: '0', 
-          color: activeColor,
-          transition: 'color 0.5s ease-in-out'
-        }}>
-          {percentage.toFixed(1)}%
-        </h1>
-        <div style={{ color: '#666', fontSize: '14px', marginTop: '5px' }}>
-          Current Pipeline Risk Assessment
-        </div>
-      </div>
-      
-      {/* Target Progress Bar */}
-      <div style={{ width: '100%', height: '14px', background: '#333', borderRadius: '7px', overflow: 'hidden' }}>
-        <div style={{ 
-          width: `${percentage}%`, 
-          height: '100%', 
-          background: activeColor,
-          transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s ease-in-out'
-        }} />
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px', fontSize: '12px', color: '#555' }}>
-        <span>Monitoring Agent: {riskData.user_id}</span>
-        <span style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-          <span style={{ 
-            width: '8px', 
-            height: '8px', 
-            background: '#00cc66', 
-            borderRadius: '50%',
-            animation: 'pulse 2s infinite'
+      {/* Header */}
+      <div style={{ padding: '14px 20px', borderBottom: '1px solid #1a1a1a', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{
+            width: 8, height: 8, borderRadius: '50%',
+            background: offline ? '#444' : '#22c55e',
+            display: 'inline-block',
+            boxShadow: offline ? 'none' : '0 0 6px #22c55e',
+            animation: offline ? 'none' : 'pulse 2s infinite',
           }} />
-          Live link: 5s Ping
-        </span>
+          <span style={{ fontWeight: 600, fontSize: 14, color: '#ccc' }}>Live Threat Monitor</span>
+        </div>
+        <div style={{ fontSize: 12, color: '#444' }}>
+          {offline ? '⚡ Backend Offline' : lastUpdate ? `Updated ${lastUpdate.toLocaleTimeString()}` : 'Syncing...'}
+        </div>
+      </div>
+
+      <div style={{ padding: '20px', display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 24, alignItems: 'center' }}>
+
+        {/* Arc Gauge */}
+        <div style={{ textAlign: 'center', position: 'relative', minWidth: 180 }}>
+          <ArcGauge pct={pct} color={color} />
+          <div style={{ position: 'absolute', bottom: 12, left: 0, right: 0, textAlign: 'center' }}>
+            <div style={{ fontSize: 28, fontWeight: 800, color, lineHeight: 1, transition: 'color 0.5s' }}>
+              {(score).toFixed(3)}
+            </div>
+            <div style={{ fontSize: 10, color: '#555', letterSpacing: '1px', marginTop: 2 }}>RISK SCORE</div>
+          </div>
+        </div>
+
+        {/* Right Panel */}
+        <div>
+          {/* Status badge */}
+          <div style={{
+            display: 'inline-block', padding: '6px 16px', borderRadius: 20,
+            background: color + '18', color, border: `1px solid ${color}44`,
+            fontWeight: 700, fontSize: 12, letterSpacing: '1.5px', marginBottom: 16,
+          }}>
+            {offline ? '— OFFLINE' : label}
+          </div>
+
+          {/* Agent Info */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+            {[
+              { label: 'Agent ID', value: riskData?.user_id || agentId },
+              { label: 'Refresh', value: `5s interval` },
+            ].map(item => (
+              <div key={item.label} style={{ background: '#141414', borderRadius: 8, padding: '10px 12px', border: '1px solid #1e1e1e' }}>
+                <div style={{ fontSize: 11, color: '#555', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</div>
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#bbb' }}>{item.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Sub-score bars */}
+          {riskData?.sub_scores && (
+            <div>
+              <div style={{ fontSize: 11, color: '#444', marginBottom: 10, letterSpacing: '0.8px', textTransform: 'uppercase' }}>Model Breakdown</div>
+              {[
+                { label: 'LightGBM', value: riskData.sub_scores.lightgbm_confidence, color: '#6366f1' },
+                { label: 'Isolation Forest', value: riskData.sub_scores.anomaly_confidence, color: '#f59e0b' },
+              ].map(s => (
+                <div key={s.label} style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, color: '#888', marginBottom: 3 }}>
+                    <span>{s.label}</span>
+                    <span style={{ color: s.color, fontWeight: 700 }}>{(s.value * 100).toFixed(1)}%</span>
+                  </div>
+                  <div style={{ height: 5, background: '#1e1e1e', borderRadius: 3, overflow: 'hidden' }}>
+                    <div style={{ width: `${s.value * 100}%`, height: '100%', background: s.color, borderRadius: 3, transition: 'width 1s ease' }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {offline && (
+            <div style={{ fontSize: 12, color: '#555', marginTop: 8, padding: '8px 12px', background: '#141414', borderRadius: 6, border: '1px solid #1e1e1e' }}>
+              Start Uvicorn backend on Port 8000 to enable live tracking.
+            </div>
+          )}
+        </div>
       </div>
 
       <style>{`
-        @keyframes pulse {
-          0% { opacity: 1; }
-          50% { opacity: 0.3; }
-          100% { opacity: 1; }
-        }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
       `}</style>
     </div>
   );
