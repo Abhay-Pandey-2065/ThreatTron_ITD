@@ -11,6 +11,8 @@ from sender.sender import send_events
 from utils.config import MONITORED_DIRECTORIES, base_event
 from utils.session import session as agent_session
 
+EMAIL_ENABLED = os.environ.get("THREATTRON_EMAIL_ENABLED", "false").lower() == "true"
+
 event_queue = Queue()
 HOSTNAME = socket.gethostname()
 
@@ -36,8 +38,9 @@ def run_agent():
     network_monitor = NetworkMonitor(event_callback, interval=15)
     network_monitor.start()
 
-    email_monitor = EmailMonitor(event_callback, interval = 30)
-    email_monitor.start()
+    if EMAIL_ENABLED:
+        email_monitor = EmailMonitor(event_callback, interval = 30)
+        email_monitor.start()
 
     while True:
         events = []
