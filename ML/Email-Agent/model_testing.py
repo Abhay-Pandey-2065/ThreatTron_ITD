@@ -3,7 +3,8 @@ import pandas as pd
 
 model = joblib.load("phishing_model.pkl")
 
-df = pd.read_csv("dataset/enron_spam_data.csv")
+df = pd.read_csv("dataset/ceas_08.csv")
+df = df.dropna(subset=["subject", "body", "label"])
 
 while True:
     print("\nChoose option:")
@@ -14,13 +15,13 @@ while True:
     choice = input("Enter choice: ")
 
     if choice == "1":
-        sample = df[df["Spam/Ham"] == "spam"].sample(1).iloc[0]
-        text = sample["Subject"] + " " + sample["Message"]
+        sample = df[df["label"] == 1].sample(1).iloc[0]
+        text = str(sample["subject"]) + " " + str(sample["body"]) + " has_url_" + str(sample["urls"]) + " " + str(sample["sender"])
         print("\nUsing REAL SPAM sample\n")
 
     elif choice == "2":
-        sample = df[df["Spam/Ham"] == "ham"].sample(1).iloc[0]
-        text = sample["Subject"] + " " + sample["Message"]
+        sample = df[df["label"] == 0].sample(1).iloc[0]
+        text = str(sample["subject"]) + " " + str(sample["body"]) + " has_url_" + str(sample["urls"]) + " " + str(sample["sender"])
         print("\nUsing REAL HAM sample\n")
 
     elif choice == "3":
