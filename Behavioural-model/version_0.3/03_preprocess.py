@@ -24,18 +24,9 @@ def run():
     # 2. Drop structurally invalid rows
     df = df.dropna(subset=['user_id'])
     
-    # 3. Categorical One-Hot Encoding for LDAP Context
-    # Machine Learning models only read numbers, not strings like "Role: Sales" or "Department: IT"
-    # This translates psychological and structural context into raw mathematical matrices
-    categorical_cols = ['role', 'department']
-    cols_to_encode = [c for c in categorical_cols if c in df.columns]
-    
-    if cols_to_encode:
-        print(f"[+] Applying Matrix Encoding to qualitative variables: {cols_to_encode}...")
-        df = pd.get_dummies(df, columns=cols_to_encode, dummy_na=True)
-        # Convert the resulting True/False columns into 1 and 0 ints for ML digestion
-        bool_cols = df.select_dtypes(include=['bool']).columns
-        df[bool_cols] = df[bool_cols].astype(int)
+    # Step 3: Categorical encoding intentionally removed.
+    # role + department columns are no longer merged from LDAP (not agent-collectable).
+    # All remaining features are purely numeric behavioral signals.
     
     # 4. Percentile Clipping (Protect Scalers)
     numeric_columns = [c for c in df.columns if c not in ['user_id', 'label'] and c not in categorical_cols]

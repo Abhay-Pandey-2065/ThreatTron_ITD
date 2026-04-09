@@ -8,10 +8,22 @@ interface RiskResponse {
   user_id?: string;
   risk_score?: number;
   is_threat?: boolean;
+  ml_score?: number;
+  rule_score?: number;
+  rules_triggered?: string[];
+  window_minutes?: number;
   sub_scores?: { lightgbm_confidence: number; anomaly_confidence: number };
   status?: string;
   message?: string;
 }
+
+const RULE_LABELS: Record<string, { label: string; color: string; icon: string }> = {
+  USB_FILE_EXFIL:        { label: 'USB + File Exfiltration',       color: '#ef4444', icon: '💾' },
+  SUSPICIOUS_WEB_STAGING:{ label: 'Suspicious Web + File Staging', color: '#f59e0b', icon: '🌐' },
+  EMAIL_EXFILTRATION:    { label: 'Email Data Leakage',            color: '#f59e0b', icon: '📧' },
+  FULL_KILL_CHAIN:       { label: '⚠ Full Kill Chain Detected',    color: '#ef4444', icon: '🚨' },
+  SUSPICIOUS_FILE_TYPES: { label: 'Suspicious File Types',         color: '#a78bfa', icon: '📁' },
+};
 
 function ArcGauge({ pct, color }: { pct: number; color: string }) {
   const r = 70;
@@ -116,17 +128,46 @@ export function MLLiveRiskGauge({ agentId = 'Global' }: MLLiveRiskGaugeProps) {
           </div>
 
           {/* Agent Info */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 14 }}>
             {[
-              { label: 'Agent ID', value: riskData?.user_id || agentId },
-              { label: 'Refresh', value: `5s interval` },
+              { label: 'Agent ID',  value: riskData?.user_id || agentId },
+              { label: 'ML Score',  value: riskData?.ml_score?.toFixed(3) ?? '—' },
+              { label: 'Rule Score', value: riskData?.rule_score?.toFixed(3) ?? '—' },
             ].map(item => (
               <div key={item.label} style={{ background: '#141414', borderRadius: 8, padding: '10px 12px', border: '1px solid #1e1e1e' }}>
-                <div style={{ fontSize: 11, color: '#555', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</div>
+                <div style={{ fontSize: 10, color: '#555', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{item.label}</div>
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#bbb' }}>{item.value}</div>
               </div>
             ))}
           </div>
+
+          {/* Rules Triggered */}
+          {riskData?.rules_triggered && riskData.rules_triggered.length > 0 && (
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 11, color: '#444', marginBottom: 8, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
+                🚨 Attack Patterns Detected
+              </div>
+              {riskData.rules_triggered.map(rule => {
+                const meta = RULE_LABELS[rule] || { label: rule, color: '#888', icon: '⚠️' };
+                return (
+                  <div key={rule} style={{
+                    display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px',
+                    marginBottom: 4, borderRadius: 6,
+                    background: meta.color + '12', border: `1px solid ${meta.color}33`,
+                  }}>
+                    <span>{meta.icon}</span>
+                    <span style={{ fontSize: 12, color: meta.color, fontWeight: 600 }}>{meta.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {riskData?.rules_triggered?.length === 0 && !offline && (
+            <div style={{ fontSize: 12, color: '#333', marginBottom: 14, padding: '8px 12px', background: '#0a0a0a', borderRadius: 6, border: '1px solid #1a1a1a' }}>
+              ✅ No behavioural patterns detected in last 30 min
+            </div>
+          )}
 
           {/* Sub-score bars */}
           {riskData?.sub_scores && (

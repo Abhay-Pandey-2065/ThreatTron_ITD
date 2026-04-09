@@ -21,10 +21,12 @@ def run():
         'total_logons': 0, 'after_hours_logons': 0, 'weekend_logons': 0, 'failed_logons': 0,
         'total_emails': 0, 'emails_with_attachments': 0, 'external_emails': 0, 'total_email_bytes': 0,
         'total_http': 0, 'suspicious_http': 0,
-        'total_file': 0, 'exe_zip_files': 0,
+        'total_file': 0, 'exe_zip_files': 0, 'after_hours_file_ops': 0,  # NEW: night/weekend file activity
         'total_device': 0
     })
-    pcs_tracked = defaultdict(set)
+    pcs_tracked     = defaultdict(set)
+    domains_tracked    = defaultdict(set)  # NEW: unique HTTP domains per user
+    recipients_tracked = defaultdict(set)  # NEW: unique external email recipients per user
 
     # 1. Processing Logon (Temporal Anomalies + Lateral Movement)
     logon_path = os.path.join(data_dir, 'logon.csv')
@@ -69,10 +71,9 @@ def run():
             for chunk in pd.read_csv(email_path, chunksize=chunk_size, usecols=['user', 'to', 'size', 'attachments']):
                 try:
                     chunk['has_attachment'] = (pd.to_numeric(chunk['attachments'], errors='coerce') > 0).astype(int)
-                    # Exfiltration: Not sending to dtaa.com (the canonical internal domain)
                     chunk['is_external'] = (~chunk['to'].str.contains('dtaa.com', case=False, na=False)).astype(int)
                     chunk['size'] = pd.to_numeric(chunk['size'], errors='coerce').fillna(0)
-                    
+
                     for user, count in chunk.groupby('user').size().items():
                         stats[user]['total_emails'] += count
                     for user, att_count in chunk.groupby('user')['has_attachment'].sum().items():
@@ -81,6 +82,10 @@ def run():
                         stats[user]['external_emails'] += ext_count
                     for user, total_bytes in chunk.groupby('user')['size'].sum().items():
                         stats[user]['total_email_bytes'] += total_bytes
+                    # NEW: unique external recipients per user
+                    ext_chunk = chunk[chunk['is_external'] == 1]
+                    for user, recip_set in ext_chunk.groupby('user')['to'].apply(set).items():
+                        recipients_tracked[user].update(recip_set)
                 except Exception as e:
                     pass
                 clean_memory()
@@ -90,16 +95,23 @@ def run():
     # 3. Processing File
     file_path = os.path.join(data_dir, 'file.csv')
     if os.path.exists(file_path):
-        print("[+] Processing file.csv for suspicious extensions...")
-        file_pattern = r'\.(?:exe|zip|rar|ps1|bat|sh|vbs|tar|gz|7z)$' # Non-capturing group prevents pure-regex warnings
+        print("[+] Processing file.csv for suspicious extensions + after-hours file ops...")
+        file_pattern = r'\.(?:exe|zip|rar|ps1|bat|sh|vbs|tar|gz|7z)$'
         try:
-            for chunk in pd.read_csv(file_path, chunksize=chunk_size, usecols=['user', 'filename']):
+            for chunk in pd.read_csv(file_path, chunksize=chunk_size, usecols=['user', 'filename', 'date']):
                 try:
                     chunk['is_suspicious'] = chunk['filename'].str.contains(file_pattern, case=False, na=False).astype(int)
+                    # NEW: after-hours file operations
+                    dt = pd.to_datetime(chunk['date'], format='%m/%d/%Y %H:%M:%S', errors='coerce')
+                    chunk['hour'] = dt.dt.hour
+                    chunk['is_after_hours'] = ((chunk['hour'] < 6) | (chunk['hour'] > 19)).fillna(0).astype(int)
+
                     for user, count in chunk.groupby('user').size().items():
                         stats[user]['total_file'] += count
                     for user, sus_count in chunk.groupby('user')['is_suspicious'].sum().items():
                         stats[user]['exe_zip_files'] += sus_count
+                    for user, ah_count in chunk.groupby('user')['is_after_hours'].sum().items():
+                        stats[user]['after_hours_file_ops'] += int(ah_count)
                 except Exception as e:
                     pass
                 clean_memory()
@@ -121,17 +133,29 @@ def run():
     # 5. Processing HTTP
     http_path = os.path.join(data_dir, 'http.csv')
     if os.path.exists(http_path):
-        print("[+] Processing 14.5GB http.csv for flagged domains...")
+        print("[+] Processing 14.5GB http.csv for flagged domains + unique domain tracking...")
         sus_pattern = r'(?:job|upload|drive|dropbox|keylog|wikileaks|mega|pastebin|github|gmail|freemail|crypto|tor|vimeo)'
+
+        def extract_domain(url):
+            try:
+                u = str(url).split('://')[-1]
+                return u.split('/')[0].split('?')[0].lower()
+            except:
+                return ''
+
         try:
             for chunk_idx, chunk in enumerate(pd.read_csv(http_path, chunksize=chunk_size, usecols=['user', 'url'])):
                 if chunk_idx % 10 == 0: print(f"  -> Processed {chunk_idx * chunk_size} HTTP rows...")
                 try:
                     chunk['is_sus_url'] = chunk['url'].str.contains(sus_pattern, case=False, na=False).astype(int)
+                    chunk['domain'] = chunk['url'].apply(extract_domain)  # NEW
                     for user, count in chunk.groupby('user').size().items():
                         stats[user]['total_http'] += count
                     for user, sus_count in chunk.groupby('user')['is_sus_url'].sum().items():
                         stats[user]['suspicious_http'] += sus_count
+                    # NEW: track unique domains per user
+                    for user, domain_set in chunk.groupby('user')['domain'].apply(set).items():
+                        domains_tracked[user].update(domain_set)
                 except Exception as e:
                     pass
                 clean_memory()
@@ -145,26 +169,13 @@ def run():
         return
         
     df.rename(columns={'index': 'user_id'}, inplace=True)
-    df['num_distinct_pcs'] = df['user_id'].apply(lambda x: len(pcs_tracked.get(x, set())))
-    df['total_email_megabytes'] = df['total_email_bytes'] / (1024 * 1024)
+    df['num_distinct_pcs']          = df['user_id'].apply(lambda x: len(pcs_tracked.get(x, set())))
+    df['unique_http_domains']       = df['user_id'].apply(lambda x: len(domains_tracked.get(x, set())))    # NEW
+    df['unique_external_recipients'] = df['user_id'].apply(lambda x: len(recipients_tracked.get(x, set()))) # NEW
+    df['total_email_megabytes']     = df['total_email_bytes'] / (1024 * 1024)
     df.drop(columns=['total_email_bytes'], inplace=True)
-    
-    # 6. Apply LDAP Data (Role and Department)
-    ldap_dir = os.path.join(data_dir, 'LDAP')
-    if os.path.exists(ldap_dir):
-        print("[+] Pulling HR organizational hierarchy from LDAP (Contextually weighting data)...")
-        ldap_files = [f for f in os.listdir(ldap_dir) if f.endswith('.csv')]
-        if ldap_files:
-            latest_ldap = sorted(ldap_files)[-1] # Grab the final organizational structure
-            ldap_df = pd.read_csv(os.path.join(ldap_dir, latest_ldap), usecols=['user_id', 'role', 'department'])
-            df = pd.merge(df, ldap_df.drop_duplicates(subset=['user_id']), on='user_id', how='left')
-
-    # 7. Apply Psychometric / OAF Data
-    psycho_path = os.path.join(data_dir, 'psychometric.csv')
-    if os.path.exists(psycho_path):
-        print("[+] Fusing Psychometric OAF scores for Behavioral Profiling...")
-        psycho_df = pd.read_csv(psycho_path, usecols=['user_id', 'O', 'C', 'E', 'A', 'N'])
-        df = pd.merge(df, psycho_df, on='user_id', how='left')
+    # LDAP (role/department) and Psychometric (O,C,E,A,N) intentionally excluded:
+    # they are not collectable from real-world agents and inflate the feature space with 91 unusable columns.
     
     # Merge Ground Truth (insiders.csv)
     insiders_path = config['paths']['insiders_csv']
