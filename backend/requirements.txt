@@ -6,3 +6,5 @@ pymysql
 python-dotenv
 requests
 python-multipart
+passlib[bcrypt]
+python-jose[cryptography]

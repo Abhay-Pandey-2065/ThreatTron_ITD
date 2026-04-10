@@ -5,12 +5,12 @@ import type { AuthUser } from './types'
 import type { AuthPortal } from './types'
 import { clearAccessToken } from '../lib/apiToken'
 import {
-  addRegisteredUser,
   clearSession,
-  findRegisteredUser,
   loadSession,
   saveSession,
 } from './storage'
+import { signupUser, loginUser } from '../lib/api'
+
 
 const DEMO_USER_EMAIL = 'user@threattron.local'
 const DEMO_ADMIN_EMAIL = 'admin@threattron.local'
@@ -44,61 +44,47 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!trimmed || !password) {
         return { ok: false as const, message: 'Enter email and password.' }
       }
-      const normalized = trimmed.toLowerCase()
-      const registered = findRegisteredUser(normalized)
-      if (registered) {
-        if (registered.password !== password) {
-          return { ok: false as const, message: 'Incorrect password.' }
-        }
-        if (registered.role !== portal) {
-          return { ok: false as const, message: wrongPortalMessage(registered.role) }
-        }
+      
+      const result = await loginUser(trimmed, password, portal)
+      
+      if (result.ok && result.data) {
         const sessionUser: AuthUser = {
-          email: registered.email,
-          role: registered.role,
+          email: result.data.email,
+          role: result.data.role,
         }
         saveSession(sessionUser)
         setUser(sessionUser)
         return { ok: true as const }
       }
-      const demo = resolveDemoUser(trimmed)
-      if (demo) {
-        if (demo.role !== portal) {
-          return { ok: false as const, message: wrongPortalMessage(demo.role) }
-        }
-        saveSession(demo)
-        setUser(demo)
-        return { ok: true as const }
-      }
+      
       return {
         ok: false as const,
-        message: 'No account found. Sign up in this portal or use a demo email.',
+        message: result.message || 'Login failed',
       }
     },
     [],
   )
+
 
   const signup = useCallback(async (email: string, password: string, portal: AuthPortal) => {
     const normalized = email.trim().toLowerCase()
     if (!normalized || !password) {
       return { ok: false as const, message: 'Enter email and password.' }
     }
-    if (RESERVED_EMAILS.has(normalized)) {
-      return {
-        ok: false as const,
-        message: 'This email is reserved for demo accounts. Use another address.',
-      }
-    }
+    
     const role = portal === 'admin' ? 'admin' : 'user'
-    const result = addRegisteredUser(normalized, password, role)
-    if (!result.ok) {
-      return result
+    const result = await signupUser(normalized, password, role)
+    
+    if (result.ok) {
+        const sessionUser: AuthUser = { email: normalized, role }
+        saveSession(sessionUser)
+        setUser(sessionUser)
+        return { ok: true as const }
     }
-    const sessionUser: AuthUser = { email: normalized, role }
-    saveSession(sessionUser)
-    setUser(sessionUser)
-    return { ok: true as const }
+    
+    return { ok: false as const, message: result.message || 'Signup failed' }
   }, [])
+
 
   const logout = useCallback(() => {
     clearSession()

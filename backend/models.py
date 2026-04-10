@@ -1,6 +1,8 @@
 from sqlalchemy import Boolean, Column, Integer, String, DateTime, Float, JSON, ForeignKey
 from sqlalchemy.orm import relationship, declared_attr
 from database import Base
+from datetime import datetime, timezone
+
 
 class AgentSession(Base):
     __tablename__ = "agent_sessions"
@@ -107,6 +109,16 @@ class NetworkEvent(SessionMixin, Base):
     pid = Column(Integer, nullable=True)
     process_name = Column(String(255), nullable=True)
     session = relationship("AgentSession", back_populates="network_events")
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(255), unique=True, index=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    role = Column(String(50), default="user") # 'admin' or 'user'
+    created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
 
 
 # NOTE (Very Important): Implement a mechanism to implement keys to recognize

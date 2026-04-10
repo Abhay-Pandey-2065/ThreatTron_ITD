@@ -261,3 +261,29 @@ export async function fetchMlInsights(q: EventsQuery): Promise<MlInsight[]> {
     return []
   }
 }
+
+/* —— Auth API —— */
+
+export async function signupUser(email: string, password: string, role: string): Promise<{ ok: boolean; message?: string }> {
+  try {
+    const res = await fetchJson<{ message: string }>(`/api/auth/signup`, {
+      method: 'POST',
+      body: JSON.stringify({ email, password, role }),
+    })
+    return { ok: true, message: res.message }
+  } catch (err: any) {
+    return { ok: false, message: err.message || 'Signup failed' }
+  }
+}
+
+export async function loginUser(email: string, password: string, portal: string): Promise<{ ok: boolean; message?: string; data?: any }> {
+  try {
+    const data = await fetchJson<any>(`/api/auth/login`, {
+      method: 'POST',
+      body: JSON.stringify({ email, password, portal }),
+    })
+    return { ok: true, data }
+  } catch (err: any) {
+    return { ok: false, message: err.message || 'Login failed' }
+  }
+}

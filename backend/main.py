@@ -14,6 +14,7 @@ from routes import processes as process_routes
 from routes import system as system_routes
 from routes import usb as usb_routes
 from routes import network as network_routes
+from routes import auth as auth_routes
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -41,6 +42,7 @@ app.include_router(process_routes.router, prefix="/api/events/processes", tags=[
 app.include_router(system_routes.router, prefix="/api/events/system", tags=["system"])
 app.include_router(usb_routes.router, prefix="/api/events/usb", tags=["usb"])
 app.include_router(network_routes.router, prefix="/api/events/network", tags=["network"])
+app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
 
 
 def _time_cutoff(time_range: str) -> Optional[datetime]:
