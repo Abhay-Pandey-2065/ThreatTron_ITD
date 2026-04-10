@@ -16,7 +16,7 @@ function formatTime(ts: string): string {
 
 function fmtPct(v: number | null): string {
   if (v == null) return '—'
-  return `${(v * 100).toFixed(1)}%`
+  return `${v.toFixed(1)}%`
 }
 
 export function SystemPage() {
