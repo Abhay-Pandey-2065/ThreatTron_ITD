@@ -75,7 +75,7 @@ export function EmailPage() {
                     {e.subject ?? '—'}
                   </td>
                   <td className="tt-table-cell--muted">{e.snippet_length ?? '—'}</td>
-                  <td>{e.has_links ?? '—'}</td>
+                  <td>{e.has_links != null ? Number(e.has_links) : '—'}</td>
                 </tr>
               ))}
             </tbody>
