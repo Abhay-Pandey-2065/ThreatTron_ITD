@@ -1,30 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { fetchLiveRisk } from '../../lib/api';
+import { fetchLiveRisk, type RiskResponse } from '../../lib/api';
 
 interface MLLiveRiskGaugeProps {
   agentId?: string;
-}
-
-interface RiskResponse {
-  user_id?: string;
-  hostname?: string;
-  risk_score?: number;
-  is_threat?: boolean;
-  ml_score?: number;
-  rule_score?: number;
-  rules_triggered?: string[];
-  window_minutes?: number;
-  event_count?: number;
-  trend?: '↑' | '↓' | '→';
-  last_alert?: string;
-  sub_scores?: {
-    lightgbm_confidence: number;
-    rf_confidence?: number;
-    lr_confidence?: number;
-    anomaly_confidence: number;
-  };
-  status?: string;
-  message?: string;
 }
 
 const RULE_LABELS: Record<string, { label: string; color: string; icon: string }> = {

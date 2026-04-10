@@ -289,21 +289,25 @@ export async function loginUser(email: string, password: string, portal: string)
 }
 
 export interface RiskResponse {
+  user_id?: string
   risk_score: number
   is_threat: boolean
   ml_score: number
   rule_score: number
   rules_triggered: string[]
-  sub_scores: { 
+  sub_scores?: {
     lightgbm_confidence: number
-    rf_confidence: number
-    lr_confidence: number
+    rf_confidence?: number
+    lr_confidence?: number
     anomaly_confidence: number
   }
   hostname: string | null
   event_count: number
+  window_minutes?: number
   trend: string
   last_alert: string | null
+  status?: string
+  message?: string
 }
 
 export async function fetchLiveRisk(agentId: string, window: number): Promise<RiskResponse> {
