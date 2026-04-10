@@ -15,12 +15,7 @@ const RULE_LABELS: Record<string, { label: string; color: string; icon: string }
   MASS_RECIPIENT_SPRAY:   { label: 'Mass Email Spray Detected',      color: '#ef4444', icon: '📤' },
 };
 
-const WINDOWS = [
-  { label: '15 min', value: 15 },
-  { label: '30 min', value: 30 },
-  { label: '1 hour', value: 60 },
-  { label: '4 hours', value: 240 },
-];
+
 
 const MODELS = [
   { key: 'lightgbm_confidence', label: '🌲 LightGBM',          color: '#6366f1' },
@@ -148,22 +143,8 @@ export function MLLiveRiskGauge({ agentId = 'Global' }: MLLiveRiskGaugeProps) {
           <span style={{ fontWeight: 600, fontSize: 14, color: '#ccc' }}>Live Threat Monitor</span>
         </div>
 
-        {/* Window selector */}
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          {WINDOWS.map(w => (
-            <button key={w.value} onClick={() => setWindow(w.value)} style={{
-              padding: '3px 10px', borderRadius: 6, fontSize: 11, cursor: 'pointer',
-              border: `1px solid ${window === w.value ? color : '#2a2a2a'}`,
-              background: window === w.value ? color + '18' : '#141414',
-              color: window === w.value ? color : '#555',
-              fontWeight: window === w.value ? 700 : 400,
-              transition: 'all 0.2s',
-            }}>{w.label}</button>
-          ))}
-        </div>
-
         <div style={{ fontSize: 12, color: '#444' }}>
-          {offline ? '⚡ Backend Offline' : lastUpdate ? `Updated ${lastUpdate.toLocaleTimeString()}` : 'Syncing...'}
+          {offline ? '⚡ Backend Offline' : 'Live Stream Active'}
         </div>
       </div>
 
