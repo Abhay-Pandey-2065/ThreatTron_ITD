@@ -80,7 +80,6 @@ class EmailEvent(SessionMixin, Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     # agent_id = Column(String(255), index=True)
     timestamp = Column(DateTime)
-    message_id = Column(String(255), nullable=True, index=True)
     sender = Column(String(500))
     subject = Column(String(1000))
     snippet_length = Column(Integer)
