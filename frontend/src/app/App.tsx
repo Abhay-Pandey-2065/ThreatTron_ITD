@@ -22,7 +22,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
-      <Route path="/user" element={<AuthPortalPage portal="user" />} />
+      {/* <Route path="/user" element={<AuthPortalPage portal="user" />} /> */}
       <Route path="/admin/sign-in" element={<AuthPortalPage portal="admin" />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />

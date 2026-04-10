@@ -12,14 +12,10 @@ export function LandingPage() {
       <div className="tt-landing__inner">
         <h1 className="tt-landing__title">ThreatTron</h1>
         <p className="tt-landing__lead">
-          Choose how you want to sign in. User and Administrator portals use separate accounts and
-          sign-up flows.
+          Sign in or register to access the administrator console.
         </p>
         <div className="tt-landing__cards">
-          <Link className="tt-landing__card" to="/user">
-            <span className="tt-landing__card-title">User</span>
-            <span className="tt-landing__card-desc">Sign in or register as a standard user</span>
-          </Link>
+
           <Link className="tt-landing__card tt-landing__card--accent" to="/admin/sign-in">
             <span className="tt-landing__card-title">Administrator</span>
             <span className="tt-landing__card-desc">Sign in or register as an administrator</span>

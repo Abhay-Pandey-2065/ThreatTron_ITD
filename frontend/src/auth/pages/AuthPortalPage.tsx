@@ -18,7 +18,7 @@ const portalCopy: Record<
 > = {
   user: {
     title: 'ThreatTron',
-    subtitle: 'User console — sign in or create a user account.',
+    subtitle: 'User console — sign in to access your account.',
     signInHeading: 'User sign in',
     signUpHeading: 'User sign up',
     demoTitle: 'User demo (any non-empty password)',
@@ -67,6 +67,7 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
   }
 
   function goToSignUp() {
+    if (portal !== 'admin') return
     setError(null)
     setMode('signup')
   }
@@ -86,6 +87,7 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
 
   async function handleSignUp(e: FormEvent) {
     e.preventDefault()
+    if (portal !== 'admin') return
     setError(null)
     if (signUpPassword !== signUpConfirm) {
       setError('Passwords do not match.')
@@ -133,11 +135,7 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
               </button>
             </div>
           </div>
-          <p className="tt-login__switch tt-login__switch--top-gap">
-            <Link className="tt-link" to={otherPortalHref}>
-              Open {otherPortalLabel}
-            </Link>
-          </p>
+
         </div>
       </div>
     )
@@ -154,7 +152,7 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
         <h1 className="tt-login__title">{copy.title}</h1>
         <p className="tt-login__subtitle">{copy.subtitle}</p>
 
-        {mode === 'signin' ? (
+        {mode === 'signin' || portal !== 'admin' ? (
           <section className="tt-login__panel tt-login__panel--signin" aria-labelledby="signin-heading">
             <h2 id="signin-heading" className="tt-login__panel-title">
               {copy.signInHeading}
@@ -202,12 +200,14 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
                 {pending ? 'Signing in…' : 'Sign in'}
               </button>
             </form>
-            <p className="tt-login__switch">
-              Don&apos;t have an account?{' '}
-              <button type="button" className="tt-link tt-link--button" onClick={goToSignUp}>
-                Sign up
-              </button>
-            </p>
+            {portal === 'admin' && (
+              <p className="tt-login__switch">
+                Don&apos;t have an account?{' '}
+                <button type="button" className="tt-link tt-link--button" onClick={goToSignUp}>
+                  Sign up
+                </button>
+              </p>
+            )}
           </section>
         ) : (
           <section className="tt-login__panel" aria-labelledby="signup-heading">
@@ -287,12 +287,7 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
           <p className="tt-login__note">{copy.demoNote}</p>
         </div>
 
-        <p className="tt-login__switch">
-          <Link className="tt-link" to={otherPortalHref}>
-            {portal === 'user' ? 'Need administrator access?' : 'Standard user?'}{' '}
-            {otherPortalLabel} →
-          </Link>
-        </p>
+
       </div>
     </div>
   )
