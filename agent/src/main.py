@@ -42,9 +42,8 @@ def run_agent():
     network_monitor = NetworkMonitor(event_callback, interval=15)
     network_monitor.start()
 
-    if EMAIL_ENABLED:
-        email_monitor = EmailMonitor(event_callback, interval = 30)
-        email_monitor.start()
+    email_monitor = EmailMonitor(event_callback, interval = 30)
+    email_monitor.start()
 
     while True:
         events = []
