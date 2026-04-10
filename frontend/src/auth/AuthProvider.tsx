@@ -15,9 +15,9 @@ import { signupUser, loginUser } from '../lib/api'
 const DEMO_USER_EMAIL = 'user@threattron.local'
 const DEMO_ADMIN_EMAIL = 'admin@threattron.local'
 
-const RESERVED_EMAILS = new Set([DEMO_USER_EMAIL, DEMO_ADMIN_EMAIL])
+const _RESERVED_EMAILS = new Set([DEMO_USER_EMAIL, DEMO_ADMIN_EMAIL])
 
-function resolveDemoUser(email: string): AuthUser | null {
+function _resolveDemoUser(email: string): AuthUser | null {
   const normalized = email.trim().toLowerCase()
   if (normalized === DEMO_ADMIN_EMAIL) {
     return { email: DEMO_ADMIN_EMAIL, role: 'admin' }
@@ -28,7 +28,7 @@ function resolveDemoUser(email: string): AuthUser | null {
   return null
 }
 
-function wrongPortalMessage(accountRole: 'user' | 'admin'): string {
+function _wrongPortalMessage(accountRole: 'user' | 'admin'): string {
   if (accountRole === 'admin') {
     return 'This account is an administrator. Use the Administrator portal to sign in.'
   }
