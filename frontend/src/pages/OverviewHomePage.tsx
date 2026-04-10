@@ -1,6 +1,5 @@
 import { OverviewChartsPlaceholder } from '../features/overview/OverviewChartsPlaceholder'
 import { OverviewKPIRow } from '../features/overview/OverviewKPIRow'
-import { OverviewMLSummary } from '../features/overview/OverviewMLSummary'
 import { OverviewRecentFeed } from '../features/overview/OverviewRecentFeed'
 import { useShellFilters } from '../layout/useShellFilters'
 
@@ -29,7 +28,6 @@ export function OverviewHomePage() {
       </header>
 
       <OverviewKPIRow />
-      <OverviewMLSummary />
       <OverviewChartsPlaceholder />
       <OverviewRecentFeed />
     </div>
