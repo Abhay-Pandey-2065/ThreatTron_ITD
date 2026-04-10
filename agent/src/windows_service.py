@@ -5,9 +5,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 from main import run_agent
 
 class ThreatTronService(win32serviceutil.ServiceFramework):
-    _svc_name = "ThreatTronAgent"
-    _svc_display_name = "ThreatTron Security Agent"
-    _svc_description = "Collects system telemetry and sends to ThreatTron backend."
+    _svc_name_ = "ThreatTronAgent"
+    _svc_display_name_ = "ThreatTron Security Agent"
+    _svc_description_ = "Collects system telemetry and sends to ThreatTron backend."
 
     def __init__(self, args):
         super().__init__(args)
