@@ -34,6 +34,7 @@ async function fetchJson<T>(path: string, init?: RequestInit): Promise<T> {
 export interface FileEventRow {
   id: number
   agent_id: string
+  session_id?: string | null
   event_type: string
   timestamp: string
   file_path: string | null
@@ -44,6 +45,7 @@ export interface FileEventRow {
 export interface ProcessEventRow {
   id: number
   agent_id: string
+  session_id?: string | null
   event_type: string
   timestamp: string
   process_name: string | null
@@ -56,6 +58,7 @@ export interface ProcessEventRow {
 export interface SystemEventRow {
   id: number
   agent_id: string
+  session_id?: string | null
   timestamp: string
   cpu_usage: number | null
   memory_usage: number | null
@@ -64,6 +67,7 @@ export interface SystemEventRow {
 export interface EmailEventRow {
   id: number
   agent_id: string
+  session_id?: string | null
   timestamp: string
   sender: string | null
   subject: string | null
@@ -74,6 +78,7 @@ export interface EmailEventRow {
 export interface USBEventRow {
   id: number
   agent_id: string
+  session_id?: string | null
   event_type: string
   timestamp: string
   mountpoint: string | null
@@ -82,6 +87,7 @@ export interface USBEventRow {
 export interface NetworkEventRow {
   id: number
   agent_id: string
+  session_id?: string | null
   timestamp: string
   local_ip_hash: string | null
   local_port: number | null
