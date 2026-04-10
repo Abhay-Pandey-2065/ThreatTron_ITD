@@ -9,7 +9,7 @@ class ThreatTronService(win32serviceutil.ServiceFramework):
     _svc_display_name = "ThreatTron Security Agent"
     _svc_description = "Collects system telemetry and sends to ThreatTron backend."
 
-    def __inti__(self, args):
+    def __init__(self, args):
         super().__init__(args)
         self.stop_event = win32event.CreateEvent(None, 0, 0, None)
 

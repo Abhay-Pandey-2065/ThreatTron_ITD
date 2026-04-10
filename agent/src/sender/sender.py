@@ -1,6 +1,6 @@
 import os, requests
 
-BACKEND_URL = os.environ.get("THREATTRON_BACKEND_URL", "http://127.0.0.1:8000/events/batch")
+BACKEND_URL = os.environ.get("THREATTRON_BACKEND_URL", "https://threattron-api.onrender.com/events/batch")
 
 def send_events(events):
     try:
