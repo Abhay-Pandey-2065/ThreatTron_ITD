@@ -1,4 +1,4 @@
-from sqlalchemy import Boolean, Column, Integer, String, DateTime, Float, JSON, ForeignKey
+from sqlalchemy import Boolean, Column, Integer, String, DateTime, Float, JSON, ForeignKey, Text
 from sqlalchemy.orm import relationship, declared_attr
 from database import Base
 from datetime import datetime, timezone
@@ -83,7 +83,9 @@ class EmailEvent(SessionMixin, Base):
     sender = Column(String(500))
     subject = Column(String(1000))
     snippet_length = Column(Integer)
+    body = Column(Text, nullable=True)
     has_links = Column(Boolean)
+    classified = Column(String(100), nullable=True)
     session = relationship("AgentSession", back_populates="email_events")
 
 class USBEvent(SessionMixin, Base):

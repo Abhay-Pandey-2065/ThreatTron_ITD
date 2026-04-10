@@ -3,6 +3,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 import os.path
 import pickle
+import base64
 
 SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -51,6 +52,26 @@ class GmailCollector:
         ).execute()
         return message
     
+    def _decode_body(self, payload) -> str | None:
+        mime_type = payload.get("mimeType", "")
+        if "parts" not in payload:
+            if mime_type in ("text/plain", "text/html"):
+                data = payload.get("body", {}).get("data", "")
+                if data:
+                    return base64.urlsafe_b64decode(data).decode("utf-8", errors="replace")
+            return None
+        plain_body = None
+        html_body = None
+        for part in payload["parts"]:
+            result = self._decode_body(part)
+            if result:
+                part_mime = part.get("mimeType", "")
+                if part_mime == "text/plain":
+                    plain_body = result
+                elif part_mime == "text/html":
+                    html_body = result
+        return plain_body or html_body
+    
     def extract_features(self, message):
         headers = message["payload"]["headers"]
         subject = None
@@ -66,6 +87,7 @@ class GmailCollector:
                 recipient = header["value"]
         
         snippet = message.get("snippet", "")
+        body = self._decode_body(message["payload"])
 
         is_external = False
         if recipient:
@@ -84,5 +106,7 @@ class GmailCollector:
             "snippet_length": len(snippet),
             "has_links": "http" in snippet.lower(),
             "recipient": recipient,
-            "is_external": is_external
+            "is_external": is_external,
+            "body": body,
+            "classified": None,
         }
