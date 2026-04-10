@@ -25,7 +25,10 @@ def run_agent():
     session_event = base_event("session_started")
     session_event["hostname"] = HOSTNAME
     session_event["metadata"] = agent_session.to_dict()
-    send_events([session_event])
+    try:
+        send_events([session_event])
+    except Exception:
+        pass
     
     file_monitor = FileMonitor(MONITORED_DIRECTORIES, event_callback)
     file_monitor.start()
