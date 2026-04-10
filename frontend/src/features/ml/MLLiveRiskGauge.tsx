@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { fetchLiveRisk } from '../../lib/api';
 
 interface MLLiveRiskGaugeProps {
   agentId?: string;
@@ -123,8 +124,7 @@ export function MLLiveRiskGauge({ agentId = 'Global' }: MLLiveRiskGaugeProps) {
   useEffect(() => {
     const fetchRisk = async () => {
       try {
-        const res  = await fetch(`http://127.0.0.1:8000/api/risk?agent_id=${agentId}&window=${window}`);
-        const data = await res.json();
+        const data = await fetchLiveRisk(agentId, window);
         prevScore.current = riskData?.risk_score ?? 0;
         setRiskData(data);
         setOffline(false);

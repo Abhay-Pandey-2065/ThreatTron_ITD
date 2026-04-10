@@ -287,3 +287,25 @@ export async function loginUser(email: string, password: string, portal: string)
     return { ok: false, message: err.message || 'Login failed' }
   }
 }
+
+export interface RiskResponse {
+  risk_score: number
+  is_threat: boolean
+  ml_score: number
+  rule_score: number
+  rules_triggered: string[]
+  sub_scores: { 
+    lightgbm_confidence: number
+    rf_confidence: number
+    lr_confidence: number
+    anomaly_confidence: number
+  }
+  hostname: string | null
+  event_count: number
+  trend: string
+  last_alert: string | null
+}
+
+export async function fetchLiveRisk(agentId: string, window: number): Promise<RiskResponse> {
+  return await fetchJson<RiskResponse>(`/api/risk?agent_id=${agentId}&window=${window}`)
+}
