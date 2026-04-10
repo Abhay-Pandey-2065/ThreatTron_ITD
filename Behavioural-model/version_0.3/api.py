@@ -127,6 +127,8 @@ def cached_predict(tuple_input):
         "risk_score": round(final_risk, 4),
         "is_threat":  bool(final_risk >= config['thresholds']['risk_score']),
         "lgb":        float(lgb),
+        "rf":         float(rf),
+        "lr":         float(lr),
         "iso":        float(iso_score),
     }
 
@@ -223,6 +225,8 @@ def predict():
             "rules_triggered": rules_fired,
             "sub_scores": {
                 "lightgbm_confidence": round(ml_result["lgb"], 4),
+                "rf_confidence":       round(ml_result["rf"], 4),
+                "lr_confidence":       round(ml_result["lr"], 4),
                 "anomaly_confidence":  round(ml_result["iso"], 4),
             },
             "status": "success"

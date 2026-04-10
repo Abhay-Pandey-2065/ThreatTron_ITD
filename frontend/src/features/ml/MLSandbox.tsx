@@ -32,7 +32,7 @@ interface PredictionResult {
   user_id: string;
   risk_score: number;
   is_threat: boolean;
-  sub_scores: { lightgbm_confidence: number; anomaly_confidence: number };
+  sub_scores: { lightgbm_confidence: number; rf_confidence?: number; lr_confidence?: number; anomaly_confidence: number };
   status: string;
   error?: string;
   rules_triggered?: string[];
@@ -274,6 +274,8 @@ export function MLSandbox() {
 
                       <div style={{ fontSize: 11, color: '#555', marginBottom: 10, letterSpacing: '0.8px', textTransform: 'uppercase' }}>ML Confidence (Under the hood)</div>
                       <SubScoreBar label="🌲 LightGBM Gradient Boosting" value={result.sub_scores.lightgbm_confidence} color="#6366f1" />
+                      <SubScoreBar label="🌳 Random Forest" value={result.sub_scores.rf_confidence || 0} color="#10b981" />
+                      <SubScoreBar label="📈 Logistic Regression" value={result.sub_scores.lr_confidence || 0} color="#3b82f6" />
                       <SubScoreBar label="🔍 Isolation Forest Anomaly" value={result.sub_scores.anomaly_confidence} color="#a78bfa" />
                     </div>
                     
