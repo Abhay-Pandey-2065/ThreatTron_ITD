@@ -3,13 +3,10 @@ from sqlalchemy.orm import Session
 from database import SessionLocal
 from models import User
 from pydantic import BaseModel, EmailStr
-from passlib.context import CryptContext
+import bcrypt
 from datetime import datetime, timezone
 
 router = APIRouter()
-
-# Password hashing setup
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class UserSignup(BaseModel):
     email: EmailStr
@@ -28,11 +25,15 @@ def get_db():
     finally:
         db.close()
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def get_password_hash(password: str) -> str:
+    # Hash a password using bcrypt
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
+    return hashed.decode('utf-8')
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    # Verify a password against a hash using bcrypt
+    return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 @router.post("/signup")
 def signup(user_data: UserSignup, db: Session = Depends(get_db)):
