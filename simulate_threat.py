@@ -49,7 +49,7 @@ def run_simulation():
             "session_id": SESSION_ID,
             "timestamp": get_iso_now(),
             "metadata": {
-                "file_path": f"D:\\Backup\\Exfiltration_Data_{i}.zip",
+                "file_path": f"C:\\Engineering\\PBL-2\\Dummy\\Exfiltration_Data_{i}.zip",
                 "action": "created"
             }
         })
