@@ -35,6 +35,9 @@ interface PredictionResult {
   sub_scores: { lightgbm_confidence: number; anomaly_confidence: number };
   status: string;
   error?: string;
+  rules_triggered?: string[];
+  ml_score?: number;
+  rule_score?: number;
 }
 
 function RiskMeter({ score }: { score: number }) {
@@ -126,9 +129,20 @@ export function MLSandbox() {
         body: JSON.stringify(formData),
       });
       const data = await response.json();
-      setResult(data);
+      if (!response.ok || data.status === 'error' || data.error) {
+        setResult({
+          user_id: 'Unknown',
+          risk_score: 0,
+          is_threat: false,
+          sub_scores: { lightgbm_confidence: 0, anomaly_confidence: 0 },
+          status: 'error',
+          error: data.error || data.message || `API Error: ${response.status}`
+        });
+      } else {
+        setResult(data);
+      }
     } catch (err) {
-      setResult({ user_id: formData.user_id, risk_score: 0, is_threat: false, sub_scores: { lightgbm_confidence: 0, anomaly_confidence: 0 }, status: 'error', error: String(err) });
+      setResult({ user_id: 'Unknown', risk_score: 0, is_threat: false, sub_scores: { lightgbm_confidence: 0, anomaly_confidence: 0 }, status: 'error', error: String(err) });
     }
     setLoading(false);
   };
