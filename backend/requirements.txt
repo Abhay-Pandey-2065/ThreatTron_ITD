@@ -9,4 +9,4 @@ python-multipart
 passlib[bcrypt]
 python-jose[cryptography]
 email-validator
-httx
+httpx
