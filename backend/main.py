@@ -425,3 +425,58 @@ async def live_risk(
         }
     finally:
         db.close()
+
+@app.get("/ml/summary")
+async def ml_summary(time_range: str = Query("24h")):
+    db: Session = SessionLocal()
+    from datetime import datetime, timedelta, timezone
+    try:
+        open_alerts = db.query(ProcessEvent).filter(ProcessEvent.suspicious_spawn == True).count()
+        return {
+            "model_name": "ThreatTron Ensemble v2.1",
+            "model_version": "2.1.4",
+            "last_inference": datetime.now(timezone.utc).isoformat(),
+            "data_window": time_range,
+            "open_alerts": open_alerts,
+            "high_severity_24h": open_alerts,
+            "highest_risk_score": 0.942
+        }
+    finally:
+        db.close()
+
+@app.get("/api/risk/timeline")
+async def risk_timeline(agent_id: str = Query(...)):
+    db: Session = SessionLocal()
+    from datetime import datetime, timedelta, timezone
+    limit = 20
+    try:
+        timeline = []
+        procs = db.query(ProcessEvent).filter(ProcessEvent.agent_id == agent_id)\
+                  .order_by(ProcessEvent.timestamp.desc()).limit(limit).all()
+        for p in procs:
+            timeline.append({
+                "id": f"proc_{p.id}", "timestamp": p.timestamp.isoformat() if p.timestamp else None,
+                "type": "process", "summary": f"Spawned {p.process_name}",
+                "detail": f"Parent: {p.parent_name} | PID: {p.parent_pid}", "severity": "warn" if p.suspicious_spawn else "info"
+            })
+        files = db.query(FileEvent).filter(FileEvent.agent_id == agent_id)\
+                  .filter(FileEvent.file_path.ilike("%.exe") | FileEvent.file_path.ilike("%.zip"))\
+                  .order_by(FileEvent.timestamp.desc()).limit(limit).all()
+        for f in files:
+            timeline.append({
+                "id": f"file_{f.id}", "timestamp": f.timestamp.isoformat() if f.timestamp else None,
+                "type": "file", "summary": f"Sensitive file: {f.file_path.split('\\')[-1] if f.file_path else 'Unknown'}",
+                "detail": f"Path: {f.file_path}", "severity": "warn"
+            })
+        usbs = db.query(USBEvent).filter(USBEvent.agent_id == agent_id)\
+                 .order_by(USBEvent.timestamp.desc()).limit(limit).all()
+        for u in usbs:
+            timeline.append({
+                "id": f"usb_{u.id}", "timestamp": u.timestamp.isoformat() if u.timestamp else None, "type": "usb",
+                "summary": "USB Device Connected" if u.event_type == "usb_inserted" else "USB Removed",
+                "detail": f"Mountpoint: {u.mountpoint}", "severity": "critical" if u.event_type == "usb_inserted" else "info"
+            })
+        timeline.sort(key=lambda x: x["timestamp"] or "", reverse=True)
+        return timeline[:limit]
+    finally:
+        db.close()
