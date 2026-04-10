@@ -46,7 +46,7 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
 
   const copy = portalCopy[portal]
   const otherPortalHref = portal === 'user' ? '/admin/sign-in' : '/user'
-  const otherPortalLabel = portal === 'user' ? 'Administrator portal' : 'User portal'
+  // const otherPortalLabel = portal === 'user' ? 'Administrator portal' : 'User portal'
 
   const [mode, setMode] = useState<AuthMode>('signin')
   const [email, setEmail] = useState('')
