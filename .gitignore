@@ -19,3 +19,8 @@ token.pickle
 dataset/
 
 training_debugging.py
+
+# PyInstaller build artifacts
+agent/dist/
+agent/build/
+agent/ThreatTronAgent.spec
