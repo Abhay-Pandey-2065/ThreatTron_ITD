@@ -7,4 +7,6 @@ python-dotenv
 requests
 python-multipart
 passlib[bcrypt]
-python-jose[cryptography]
+python-jose[cryptography]
+email-validator
+httx

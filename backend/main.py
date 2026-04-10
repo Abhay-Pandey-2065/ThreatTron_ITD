@@ -16,6 +16,10 @@ from routes import usb as usb_routes
 from routes import network as network_routes
 from routes import auth as auth_routes
 
+import httpx
+from collections import deque
+import requests
+
 # Create tables
 Base.metadata.create_all(bind=engine)
 
@@ -175,12 +179,6 @@ def overview_recent(
         db.close()
 
 
-# ------------------------------------------------------------------
-# NEW CHANGE: The ML Brain Bridge! 
-# This gathers real database counts and asks the Render ML URL.
-# ------------------------------------------------------------------
-import requests
-
 @app.get("/api/risk")
 def get_live_risk(agent_id: Optional[str] = Query(None)):
     db: Session = SessionLocal()
@@ -305,11 +303,6 @@ def receive_events(payload: dict):
     return {"status": "success", "count": len(events)}
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# 🔴 LIVE RISK ENDPOINT  –  consumed by MLLiveRiskGauge every 5 s
-# ─────────────────────────────────────────────────────────────────────────────
-import httpx
-from collections import deque
 
 ML_API_URL          = os.getenv("ML_API_URL", "https://ml-api-2ru4.onrender.com/predict")
 _score_history: dict[str, deque] = {}   # agent_id → last 12 scores (60 s @ 5 s interval)
@@ -431,4 +424,4 @@ async def live_risk(
             "trend": "→", "event_count": 0, "hostname": None, "last_alert": None,
         }
     finally:
-        db.close()
+        db.close()
