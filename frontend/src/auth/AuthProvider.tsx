@@ -12,28 +12,28 @@ import {
 import { signupUser, loginUser } from '../lib/api'
 
 
-const DEMO_USER_EMAIL = 'user@threattron.local'
-const DEMO_ADMIN_EMAIL = 'admin@threattron.local'
+// const DEMO_USER_EMAIL = 'user@threattron.local'
+// const DEMO_ADMIN_EMAIL = 'admin@threattron.local'
 
-const _RESERVED_EMAILS = new Set([DEMO_USER_EMAIL, DEMO_ADMIN_EMAIL])
+// const _RESERVED_EMAILS = new Set([DEMO_USER_EMAIL, DEMO_ADMIN_EMAIL])
 
-function _resolveDemoUser(email: string): AuthUser | null {
-  const normalized = email.trim().toLowerCase()
-  if (normalized === DEMO_ADMIN_EMAIL) {
-    return { email: DEMO_ADMIN_EMAIL, role: 'admin' }
-  }
-  if (normalized === DEMO_USER_EMAIL) {
-    return { email: DEMO_USER_EMAIL, role: 'user' }
-  }
-  return null
-}
+// function _resolveDemoUser(email: string): AuthUser | null {
+//   const normalized = email.trim().toLowerCase()
+//   if (normalized === DEMO_ADMIN_EMAIL) {
+//     return { email: DEMO_ADMIN_EMAIL, role: 'admin' }
+//   }
+//   if (normalized === DEMO_USER_EMAIL) {
+//     return { email: DEMO_USER_EMAIL, role: 'user' }
+//   }
+//   return null
+// }
 
-function _wrongPortalMessage(accountRole: 'user' | 'admin'): string {
-  if (accountRole === 'admin') {
-    return 'This account is an administrator. Use the Administrator portal to sign in.'
-  }
-  return 'This account is a standard user. Use the User portal to sign in.'
-}
+// function _wrongPortalMessage(accountRole: 'user' | 'admin'): string {
+//   if (accountRole === 'admin') {
+//     return 'This account is an administrator. Use the Administrator portal to sign in.'
+//   }
+//   return 'This account is a standard user. Use the User portal to sign in.'
+// }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => loadSession())
