@@ -14,7 +14,6 @@ from routes import processes as process_routes
 from routes import system as system_routes
 from routes import usb as usb_routes
 from routes import network as network_routes
-from routes import auth as auth_routes
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -42,7 +41,6 @@ app.include_router(process_routes.router, prefix="/api/events/processes", tags=[
 app.include_router(system_routes.router, prefix="/api/events/system", tags=["system"])
 app.include_router(usb_routes.router, prefix="/api/events/usb", tags=["usb"])
 app.include_router(network_routes.router, prefix="/api/events/network", tags=["network"])
-app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
 
 
 def _time_cutoff(time_range: str) -> Optional[datetime]:
@@ -303,3 +301,132 @@ def receive_events(payload: dict):
     db.close()
 
     return {"status": "success", "count": len(events)}
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 🔴 LIVE RISK ENDPOINT  –  consumed by MLLiveRiskGauge every 5 s
+# ─────────────────────────────────────────────────────────────────────────────
+import httpx
+from collections import deque
+
+ML_API_URL          = os.getenv("ML_API_URL", "https://ml-api-2ru4.onrender.com/predict")
+_score_history: dict[str, deque] = {}   # agent_id → last 12 scores (60 s @ 5 s interval)
+_last_alert:    dict[str, str]   = {}   # agent_id → ISO timestamp of last rule trigger
+
+
+@app.get("/api/risk")
+async def live_risk(
+    agent_id: str = Query("Global"),
+    window:   int = Query(30),          # minutes — selectable from frontend
+):
+    db: Session = SessionLocal()
+    from datetime import datetime, timedelta, timezone
+    cutoff = datetime.now(timezone.utc) - timedelta(minutes=window)
+
+    try:
+        def q(model):
+            base = db.query(model)
+            if agent_id != "Global":
+                base = base.filter(model.agent_id == agent_id)
+            if hasattr(model, "timestamp"):
+                base = base.filter(model.timestamp >= cutoff)
+            return base
+
+        # ── hostname from agent_sessions ──────────────────────────────────────
+        hostname = None
+        if agent_id != "Global":
+            sess = db.query(AgentSession)\
+                     .filter(AgentSession.agent_id == agent_id)\
+                     .order_by(AgentSession.started_at.desc()).first()
+            hostname = sess.hostname if sess else None
+
+        # ── event counts ──────────────────────────────────────────────────────
+        total_file       = q(FileEvent).count()
+        exe_zip_files    = q(FileEvent).filter(
+            FileEvent.file_path.ilike("%.exe") |
+            FileEvent.file_path.ilike("%.zip") |
+            FileEvent.file_path.ilike("%.rar")
+        ).count()
+        after_hrs_files  = (
+            q(FileEvent).filter(func.hour(FileEvent.timestamp) >= 19).count() +
+            q(FileEvent).filter(func.hour(FileEvent.timestamp) <= 6).count()
+        )
+        total_device     = q(USBEvent).count()
+        total_emails     = q(EmailEvent).count()
+        emails_attach    = q(EmailEvent).filter(EmailEvent.snippet_length > 200).count()
+        external_emails  = q(EmailEvent).filter(
+            ~EmailEvent.sender.ilike("%@company.com")
+        ).count()
+        total_http       = q(NetworkEvent).count()
+        suspicious_http  = q(NetworkEvent).filter(
+            NetworkEvent.remote_port.in_([4444, 8080, 9090, 31337])
+        ).count()
+        uniq_q = db.query(func.count(func.distinct(NetworkEvent.remote_ip_hash)))
+        if agent_id != "Global":
+            uniq_q = uniq_q.filter(NetworkEvent.agent_id == agent_id)
+        unique_domains   = uniq_q.filter(NetworkEvent.timestamp >= cutoff).scalar() or 0
+        total_logons     = q(SystemEvent).count()
+        failed_logons    = q(ProcessEvent).filter(ProcessEvent.suspicious_spawn == True).count()
+        after_hrs_logons = (
+            q(SystemEvent).filter(func.hour(SystemEvent.timestamp) >= 19).count() +
+            q(SystemEvent).filter(func.hour(SystemEvent.timestamp) <= 6).count()
+        )
+        distinct_pcs     = db.query(func.count(func.distinct(AgentSession.hostname)))\
+                             .filter(AgentSession.agent_id == agent_id)\
+                             .scalar() or 1
+
+        total_events = (
+            total_file + total_device + total_emails +
+            total_http + total_logons
+        )
+
+        payload = {
+            "user_id": agent_id,
+            "total_logons": total_logons, "after_hours_logons": after_hrs_logons,
+            "weekend_logons": 0,          "failed_logons": failed_logons,
+            "total_emails": total_emails, "emails_with_attachments": emails_attach,
+            "external_emails": external_emails, "total_email_megabytes": 0,
+            "total_http": total_http,     "suspicious_http": suspicious_http,
+            "total_file": total_file,     "exe_zip_files": exe_zip_files,
+            "after_hours_file_ops": after_hrs_files, "total_device": total_device,
+            "num_distinct_pcs": distinct_pcs, "unique_http_domains": unique_domains,
+            "unique_external_recipients": external_emails,
+        }
+
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            ml_resp = await client.post(ML_API_URL, json=payload)
+            ml_data = ml_resp.json()
+
+        # ── trend tracking ────────────────────────────────────────────────────
+        score = ml_data.get("risk_score", 0)
+        hist  = _score_history.setdefault(agent_id, deque(maxlen=12))
+        trend = "→"
+        if len(hist) >= 2:
+            delta = score - hist[-1]
+            trend = "↑" if delta > 0.02 else ("↓" if delta < -0.02 else "→")
+        hist.append(score)
+
+        # ── last alert tracking ───────────────────────────────────────────────
+        rules = ml_data.get("rules_triggered", [])
+        if rules:
+            _last_alert[agent_id] = datetime.now(timezone.utc).isoformat()
+
+        ml_data.update({
+            "hostname":      hostname,
+            "event_count":   total_events,
+            "window_minutes": window,
+            "trend":         trend,
+            "last_alert":    _last_alert.get(agent_id),
+        })
+        return ml_data
+
+    except Exception as exc:
+        return {
+            "status": "error", "message": str(exc),
+            "risk_score": 0, "is_threat": False,
+            "ml_score": 0,   "rule_score": 0,
+            "rules_triggered": [], "window_minutes": window,
+            "trend": "→", "event_count": 0, "hostname": None, "last_alert": None,
+        }
+    finally:
+        db.close()
