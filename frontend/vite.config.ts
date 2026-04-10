@@ -5,3 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
 })
+
+// All public env vars must start with VITE_
+// e.g. VITE_API_URL=https://your-deployed-backend.com
