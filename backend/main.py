@@ -287,9 +287,12 @@ def receive_events(payload: dict):
             has_links_raw = metadata.get("has_links")
             db.add(EmailEvent(
                 session_id=session_id, agent_id=agent_id, timestamp=timestamp,
+                message_id=metadata.get("message_id"),
                 sender=metadata.get("sender"), subject=metadata.get("subject"),
                 snippet_length=metadata.get("snippet_length"),
                 has_links=bool(has_links_raw) if has_links_raw is not None else None,
+                body=metadata.get("body"),
+                classified=metadata.get("classified"),
             ))
         elif event_type in ["usb_inserted", "usb_removed"]:
             db.add(USBEvent(
