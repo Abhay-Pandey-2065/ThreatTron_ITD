@@ -153,12 +153,12 @@ def run_rule_engine(data: dict):
         fired.append("USB_FILE_EXFIL")
 
     # Rule 2 — Suspicious web + file staging
-    if sus_http > 0 and total_file > 10:
+    if sus_http > 3 and total_file > 30:
         score += 0.30
         fired.append("SUSPICIOUS_WEB_STAGING")
 
     # Rule 3 — External email + file activity
-    if ext_email > 0 and total_file > 3:
+    if ext_email > 3 and total_file > 30:
         score += 0.25
         fired.append("EMAIL_EXFILTRATION")
 
