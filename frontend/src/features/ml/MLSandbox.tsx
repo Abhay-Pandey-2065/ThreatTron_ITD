@@ -26,6 +26,16 @@ const PRESETS = {
   Critical:   { total_logons: 60,  after_hours_logons: 45, weekend_logons: 0, failed_logons: 12, total_emails: 105,  emails_with_attachments: 80,  external_emails: 95,  total_email_megabytes: 350,total_http: 25000, suspicious_http: 1150, total_file: 45000, exe_zip_files: 100, after_hours_file_ops: 8000,total_device: 5, num_distinct_pcs: 4, unique_http_domains: 120, unique_external_recipients: 40 },
 };
 
+const RULE_DESCRIPTIONS: Record<string, string> = {
+  USB_FILE_EXFIL: "Large volume of files transferred with active USB storage",
+  SUSPICIOUS_WEB_STAGING: "Suspicious websites visited alongside bulk file operations",
+  EMAIL_EXFILTRATION: "External emails sent out paired with significant file activity",
+  FULL_KILL_CHAIN: "Multi-vector threat: Suspicious web, external emails, and USB used together",
+  SUSPICIOUS_FILE_TYPES: "Multiple executable (.exe) or compressed (.zip) files created/moved",
+  AFTER_HOURS_EXFIL: "Late night/after-hours file activity linked with external data gateways",
+  MASS_RECIPIENT_SPRAY: "Email spray pattern: Mass delivery to outside domains"
+};
+
 type PresetKey = keyof typeof PRESETS;
 
 interface PredictionResult {
@@ -255,7 +265,7 @@ export function MLSandbox() {
                           </div>
                           {result.rules_triggered.map((rule: string) => (
                             <div key={rule} style={{ padding: '4px 8px', background: '#f59e0b1a', color: '#f59e0b', border: '1px solid #f59e0b33', borderRadius: 4, fontSize: 12, display: 'inline-block', marginRight: 8, marginBottom: 8 }}>
-                                {rule}
+                                ⚠️ {RULE_DESCRIPTIONS[rule] || rule}
                             </div>
                           ))}
                         </div>
