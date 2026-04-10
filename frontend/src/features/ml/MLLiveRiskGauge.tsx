@@ -141,10 +141,42 @@ export function MLLiveRiskGauge({ agentId = 'Global' }: MLLiveRiskGaugeProps) {
             animation: offline ? 'none' : 'pulse 2s infinite',
           }} />
           <span style={{ fontWeight: 600, fontSize: 14, color: '#ccc' }}>Live Threat Monitor</span>
+          
+          <div style={{ marginLeft: 8, display: 'flex', alignItems: 'center', gap: 4, background: '#0a0a0a', padding: '2px', borderRadius: 6, border: '1px solid #1a1a1a' }}>
+            {[15, 30, 60].map(v => (
+              <button
+                key={v}
+                onClick={() => setWindow(v)}
+                title={`Analyze last ${v} minutes`}
+                style={{
+                  background: window === v ? '#1a1a1a' : 'transparent',
+                  border: 'none',
+                  color: window === v ? '#6366f1' : '#444',
+                  fontSize: 9,
+                  fontWeight: 800,
+                  padding: '2px 6px',
+                  borderRadius: 4,
+                  cursor: 'pointer',
+                  transition: 'all 0.2s'
+                }}
+              >
+                {v}M
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div style={{ fontSize: 12, color: '#444' }}>
-          {offline ? '⚡ Backend Offline' : 'Live Stream Active'}
+        <div style={{ fontSize: 11, color: '#444', display: 'flex', gap: 10 }}>
+          {offline ? '⚡ Backend Offline' : (
+            <>
+              <span style={{ color: '#555' }}>Live Stream Active</span>
+              {lastUpdate && (
+                <span style={{ color: '#333' }}>
+                  | &nbsp; Updated {lastUpdate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </span>
+              )}
+            </>
+          )}
         </div>
       </div>
 
