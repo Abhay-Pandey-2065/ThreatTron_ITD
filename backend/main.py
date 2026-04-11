@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -15,6 +15,7 @@ from routes import system as system_routes
 from routes import usb as usb_routes
 from routes import network as network_routes
 from routes import auth as auth_routes
+import email_api
 
 import httpx
 from collections import deque
@@ -47,6 +48,7 @@ app.include_router(system_routes.router, prefix="/api/events/system", tags=["sys
 app.include_router(usb_routes.router, prefix="/api/events/usb", tags=["usb"])
 app.include_router(network_routes.router, prefix="/api/events/network", tags=["network"])
 app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
+app.include_router(email_api.router, prefix="/api/emails", tags=["email-api"])
 
 
 def _time_cutoff(time_range: str) -> Optional[datetime]:
@@ -229,10 +231,11 @@ def sandbox_predict(payload: dict):
 
 # ─── Legacy batch ingest (used by the agent) ───
 @app.post("/events/batch")
-def receive_events(payload: dict):
+def receive_events(payload: dict, background_tasks: BackgroundTasks):
     db: Session = SessionLocal()
 
     events = payload.get("events", [])
+    has_emails = any(e.get("event_type") == "email_received" for e in events)
 
     for event in events:
         event_type = event.get("event_type")
@@ -283,7 +286,7 @@ def receive_events(payload: dict):
                 session_id=session_id, agent_id=agent_id, timestamp=timestamp,
                 cpu_usage=metadata.get("cpu_usage"), memory_usage=metadata.get("memory_usage")
             ))
-        elif event_type == "email_received":
+        elif event_type in ["email_received", "email"]:
             has_links_raw = metadata.get("has_links")
             db.add(EmailEvent(
                 session_id=session_id, agent_id=agent_id, timestamp=timestamp,
@@ -291,7 +294,7 @@ def receive_events(payload: dict):
                 snippet_length=metadata.get("snippet_length"),
                 has_links=bool(has_links_raw) if has_links_raw is not None else None,
                 body=metadata.get("body"),
-                classified=metadata.get("classified")
+                classified=None
             ))
         elif event_type in ["usb_inserted", "usb_removed"]:
             db.add(USBEvent(
@@ -300,6 +303,9 @@ def receive_events(payload: dict):
             ))
 
     db.commit()
+    
+    background_tasks.add_task(email_api.process_unclassified_logic)
+
     db.close()
 
     return {"status": "success", "count": len(events)}

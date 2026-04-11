@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, BackgroundTasks
 from database import SessionLocal
 from models import EmailEvent
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from pydantic import BaseModel
+from email_api import process_unclassified_logic
 import os
 import requests
 
@@ -36,12 +37,17 @@ def get_email_events(
         db.close()
 
 @router.post("/")
-def receive_email_events(events: list):
+def receive_email_events(events: list, background_tasks: BackgroundTasks):
+    print("EMAIL ENDPOINT HIT")
     db = SessionLocal()
     for event in events:
         has_links_raw = event["metadata"].get("has_links")
-        db.add(EmailEvent(agent_id=event["agent_id"], timestamp=datetime.fromisoformat(event["timestamp"]), sender=event["metadata"].get("sender"), subject=event["metadata"].get("subject"), snippet_length=event["metadata"].get("snippet_length"), has_links=bool(has_links_raw) if has_links_raw is not None else None))
+        db.add(EmailEvent(agent_id=event["agent_id"], timestamp=datetime.fromisoformat(event["timestamp"]), sender=event["metadata"].get("sender"), subject=event["metadata"].get("subject"), snippet_length=event["metadata"].get("snippet_length"), has_links=bool(has_links_raw) if has_links_raw is not None else None, classified=None))
     db.commit()
+
+    print("DEBUG: [Emails Route] Queuing background classification task.")
+    background_tasks.add_task(process_unclassified_logic)
+
     db.close()
     return {"status": "email events stored"}
 
@@ -53,7 +59,7 @@ class AnalyzeEmailRequest(BaseModel):
 
 @router.post("/analyze")
 def analyze_email(req: AnalyzeEmailRequest):
-    ml_url = os.environ.get("THREATTRON_EMAIL_ML_URL", "http://127.0.0.1:8001/predict")
+    ml_url = os.environ.get("THREATTRON_EMAIL_ML_URL", "https://email-agent-c2ra.onrender.com/predict")
     try:
         response = requests.post(
             ml_url, 

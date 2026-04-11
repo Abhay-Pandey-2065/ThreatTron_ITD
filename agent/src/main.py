@@ -12,7 +12,7 @@ from sender.sender import send_events
 from utils.config import MONITORED_DIRECTORIES, base_event
 from utils.session import session as agent_session
 
-EMAIL_ENABLED = os.environ.get("THREATTRON_EMAIL_ENABLED", "false").lower() == "true"
+EMAIL_ENABLED = os.environ.get("THREATTRON_EMAIL_ENABLED", "true").lower() == "true"
 
 event_queue = Queue()
 HOSTNAME = socket.gethostname()
