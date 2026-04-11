@@ -23,6 +23,7 @@ import requests
 
 # Create tables
 Base.metadata.create_all(bind=engine)
+engine.dispose()
 
 app = FastAPI()
 
