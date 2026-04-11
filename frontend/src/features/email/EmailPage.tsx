@@ -61,11 +61,14 @@ export function EmailPage() {
                 <th>Subject</th>
                 <th>Snippet</th>
                 <th>Links</th>
+                <th>Body</th>
+                <th>Classified</th>
               </tr>
             </thead>
             <tbody>
               {events.map((e) => (
                 <tr key={e.id}>
+                  <td> className="tt-table-cell--mono"{e.id}</td>
                   <td className="tt-table-cell--mono tt-table-cell--nowrap">{formatTime(e.timestamp)}</td>
                   <td className="tt-table-cell--mono tt-table-cell--muted">{e.agent_id}</td>
                   <td style={{ maxWidth: '12rem', overflow: 'hidden', textOverflow: 'ellipsis' }} title={e.sender ?? ''}>
@@ -76,6 +79,16 @@ export function EmailPage() {
                   </td>
                   <td className="tt-table-cell--muted">{e.snippet_length ?? '—'}</td>
                   <td>{e.has_links != null ? Number(e.has_links) : '—'}</td>
+                  <td style={{maxWidth: '20rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}} title={e.body ?? ''}>
+                    {e.body ?? '-'}
+                  </td>
+                  <td>
+                    {e.classified != null ? (
+                      <span className='tt-badge' style={{backgroundColor: String(e.classified).toLowerCase() === 'spam' || String(e.classified) === 'true' || String(e.classified) === '1' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)', color: String(e.classified).toLowerCase() === 'spam' || String(e.classified) === 'true' || String(e.classified) === '1' ? '#ef4444' : '#10b981'}}>
+                        {String(e.classified)}
+                      </span>
+                    ) : '-'}
+                  </td>
                 </tr>
               ))}
             </tbody>

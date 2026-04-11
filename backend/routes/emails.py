@@ -32,7 +32,7 @@ def get_email_events(
         if agent_id:
             q = q.filter(EmailEvent.agent_id == agent_id)
         events = q.offset(offset).limit(limit).all()
-        return {"events": [{"id": e.id, "agent_id": e.agent_id, "timestamp": e.timestamp.isoformat() if e.timestamp else None, "sender": e.sender, "subject": e.subject, "snippet_length": e.snippet_length, "has_links": e.has_links} for e in events]}
+        return {"events": [{"id": e.id, "agent_id": e.agent_id, "timestamp": e.timestamp.isoformat() if e.timestamp else None, "sender": e.sender, "subject": e.subject, "snippet_length": e.snippet_length, "has_links": e.has_links, "body": e.body, "classified": e.classified} for e in events]}
     finally:
         db.close()
 

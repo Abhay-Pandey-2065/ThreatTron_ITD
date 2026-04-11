@@ -73,6 +73,8 @@ export interface EmailEventRow {
   subject: string | null
   snippet_length: number | null
   has_links: boolean | null
+  body?: string | null
+  classified?: string | number | boolean | null
 }
 
 export interface USBEventRow {

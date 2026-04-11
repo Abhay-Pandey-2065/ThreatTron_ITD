@@ -346,9 +346,12 @@ export function AdminHomePage() {
                     <table className="tt-table">
                       <thead>
                         <tr>
+                          <th>ID</th>
                           <th>Time</th>
                           <th>Sender</th>
                           <th>Subject</th>
+                          <th>Body</th>
+                          <th>Classified</th>
                         </tr>
                       </thead>
                       <tbody>
