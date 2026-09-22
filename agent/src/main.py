@@ -9,7 +9,7 @@ from collector.file_collector import FileMonitor
 from collector.usb_monitor import USBMonitor
 from mail.email_monitor import EmailMonitor
 from sender.sender import send_events
-from utils.config import MONITORED_DIRECTORIES, base_event
+from utils.config import MONITORED_DIRECTORIES, THREAD_POOL_SIZE, base_event
 from utils.session import session as agent_session
 
 EMAIL_ENABLED = os.environ.get("THREATTRON_EMAIL_ENABLED", "true").lower() == "true"
@@ -30,7 +30,7 @@ def run_agent():
     except Exception:
         pass
     
-    file_monitor = FileMonitor(MONITORED_DIRECTORIES, event_callback)
+    file_monitor = FileMonitor(MONITORED_DIRECTORIES, event_callback, worker_count=THREAD_POOL_SIZE)
     file_monitor.start()
 
     usb_monitor = USBMonitor(event_callback)

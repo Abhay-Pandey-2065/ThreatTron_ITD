@@ -3,6 +3,7 @@ import psutil
 import time
 import threading
 import struct
+from queue import Queue, Empty
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from utils.config import base_event
@@ -313,23 +314,73 @@ class CorporateFileHandler(FileSystemEventHandler):
 
 class FileMonitor:
 
-    def __init__(self, directories, event_callback):
-        self.observer = Observer()
-        self.directories = directories
+    def __init__(self, directories, event_callback, worker_count=None):
+        self.directories = list(directories or [])
         self.event_callback = event_callback
+        self.worker_count = max(1, int(worker_count or min(4, max(1, len(self.directories)))))
+        self.stop_event = threading.Event()
+        self.work_queue = Queue()
+        self.worker_threads = []
+        self._observer_lock = threading.Lock()
+        self._observers = []
 
     def start(self):
-        handler = CorporateFileHandler(self.event_callback)
         for directory in self.directories:
-            self.observer.schedule(handler, directory, recursive=True)
-        self.observer.start()
-        thread = threading.Thread(target=self._keep_alive, daemon=True)
-        thread.start()
-    
-    def _keep_alive(self):
+            self.work_queue.put(directory)
+
+        for _ in range(self.worker_count):
+            thread = threading.Thread(target=self._worker_loop, daemon=True)
+            thread.start()
+            self.worker_threads.append(thread)
+
+    def _worker_loop(self):
+        while not self.stop_event.is_set():
+            try:
+                directory = self.work_queue.get(timeout=0.5)
+            except Empty:
+                continue
+
+            try:
+                self._watch_directory(directory)
+            except Exception as exc:
+                print(f"[FileMonitor] Worker failed for {directory}: {exc}")
+            finally:
+                self.work_queue.task_done()
+
+    def _watch_directory(self, directory):
+        if not directory or not os.path.isdir(directory):
+            print(f"[FileMonitor] Skipping missing directory: {directory}")
+            return
+
+        observer = Observer()
+        handler = CorporateFileHandler(self.event_callback)
+        observer.schedule(handler, directory, recursive=True)
+
+        with self._observer_lock:
+            self._observers.append(observer)
+
         try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            self.observer.stop()
-        self.observer.join()
+            observer.start()
+            while not self.stop_event.is_set():
+                time.sleep(0.5)
+        except Exception as exc:
+            print(f"[FileMonitor] Error watching {directory}: {exc}")
+        finally:
+            try:
+                observer.stop()
+                observer.join(timeout=5)
+            except Exception:
+                pass
+            with self._observer_lock:
+                if observer in self._observers:
+                    self._observers.remove(observer)
+
+    def stop(self):
+        self.stop_event.set()
+        for observer in list(self._observers):
+            try:
+                observer.stop()
+            except Exception:
+                pass
+        for thread in self.worker_threads:
+            thread.join(timeout=2)
