@@ -20,6 +20,7 @@ dataset/
 
 training_debugging.py
 
+monitor_config.json
 # PyInstaller build artifacts
 agent/dist/
 agent/build/
