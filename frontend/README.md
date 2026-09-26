@@ -15,7 +15,9 @@ cd frontend
 npm install
 ```
 
-Copy `.env.example` to `.env` and set `VITE_API_URL` to your FastAPI base URL (default `http://127.0.0.1:8000`).
+Copy `.env.example` to `.env` and set `VITE_API_URL` to your FastAPI base URL (default `http://127.0.0.1:8000`). Optionally set `VITE_ML_API_URL` to override the ML API URL.
+
+While the website is open, it pings the backend and ML API every 10 minutes and when the tab visibility changes. This can reduce cold starts but cannot keep services awake after all site tabs are closed or when the browser/device suspends them.
 
 ## Scripts
 

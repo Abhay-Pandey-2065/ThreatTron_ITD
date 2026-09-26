@@ -19,8 +19,11 @@ import { AdminHomePage } from '../pages/AdminHomePage'
 import { AlertsPage } from '../pages/AlertsPage'
 import { InvestigationsPage } from '../pages/InvestigationsPage'
 import { WorkflowSandboxPage } from '../pages/WorkflowSandboxPage'
+import { useServiceKeepAlive } from '../layout/useServiceKeepAlive'
 
 export default function App() {
+  useServiceKeepAlive()
+
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />

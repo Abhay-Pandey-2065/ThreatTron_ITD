@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { getMlApiBaseUrl } from '../../lib/apiToken'
 
 const FIELD_META: Record<string, { label: string; description: string }> = {
   total_logons:                 { label: 'Total Logons', description: 'Total login events' },
@@ -133,7 +134,7 @@ export function MLSandbox() {
     setLoading(true);
     setResult(null);
     try {
-      const response = await fetch('https://ml-api-2ru4.onrender.com/predict', {
+      const response = await fetch(`${getMlApiBaseUrl()}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

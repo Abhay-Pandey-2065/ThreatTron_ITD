@@ -25,6 +25,11 @@ export function getApiBaseUrl(): string {
   return base
 }
 
+export function getMlApiBaseUrl(): string {
+  const base = (import.meta.env.VITE_ML_API_URL?.replace(/\/$/, '') ?? 'https://ml-api-2ru4.onrender.com').trim()
+  return base
+}
+
 /** Headers for `fetch` including Bearer token when present. */
 export function authHeaders(json = true): HeadersInit {
   const headers: Record<string, string> = {}
