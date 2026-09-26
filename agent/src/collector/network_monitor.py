@@ -26,19 +26,26 @@ def _get_pid_to_name() -> dict:
 
 class NetworkMonitor:
 
-    def __init__(self, event_callback, interval: int = 15):
+    def __init__(self, event_callback, interval: int = 15, stop_event=None):
         self.event_callback = event_callback
         self.interval = interval
+        self.stop_event = stop_event or threading.Event()
+        self.thread = None
         self._seen_connections: set = set()
 
     def start(self):
-        thread = threading.Thread(target = self._monitor_loop, daemon=True)
-        thread.start()
+        self.thread = threading.Thread(target=self._monitor_loop, name="network-monitor", daemon=True)
+        self.thread.start()
+
+    def stop(self):
+        self.stop_event.set()
+        if self.thread is not None:
+            self.thread.join(timeout=self.interval + 1)
 
     def _monitor_loop(self):
-        while True:
+        while not self.stop_event.is_set():
             self._collect()
-            time.sleep(self.interval)
+            self.stop_event.wait(self.interval)
     
     def _collect(self):
         pid_to_name = _get_pid_to_name()

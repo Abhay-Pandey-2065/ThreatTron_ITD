@@ -5,9 +5,11 @@ from utils.config import base_event
 
 class USBMonitor:
     
-    def __init__(self, event_callback, interval=5):
+    def __init__(self, event_callback, interval=5, stop_event=None):
         self.event_callback = event_callback
         self.interval = interval
+        self.stop_event = stop_event or threading.Event()
+        self.thread = None
         self.previous_devices = self._get_removable_devices()
         self._usage_at_insert: dict[str, int] = {}
 
@@ -25,12 +27,16 @@ class USBMonitor:
             return None
         
     def start(self):
-        thread = threading.Thread(target=self._monitor_loop)
-        thread.daemon = True
-        thread.start()
+        self.thread = threading.Thread(target=self._monitor_loop, name="usb-monitor", daemon=True)
+        self.thread.start()
+
+    def stop(self):
+        self.stop_event.set()
+        if self.thread is not None:
+            self.thread.join(timeout=self.interval + 1)
 
     def _monitor_loop(self):
-        while True:
+        while not self.stop_event.is_set():
             current_devices = self._get_removable_devices()
             inserted = current_devices - self.previous_devices
             removed = self.previous_devices - current_devices
@@ -70,4 +76,4 @@ class USBMonitor:
                     self._last_known_usage[device] = usage
                     
             self.previous_devices = current_devices
-            time.sleep(self.interval)
+            self.stop_event.wait(self.interval)

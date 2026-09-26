@@ -1,18 +1,16 @@
 import os
 import time
 import socket
+import threading
 from queue import Queue, Empty
 from collector.process_monitor import ProcessMonitor
 from collector.network_monitor import NetworkMonitor
 from collector.system_collector import collect_system_activity
 from collector.file_collector import FileMonitor
 from collector.usb_monitor import USBMonitor
-from mail.email_monitor import EmailMonitor
 from sender.sender import send_events
 from utils.config import MONITORED_DIRECTORIES, THREAD_POOL_SIZE, base_event
 from utils.session import session as agent_session
-
-EMAIL_ENABLED = os.environ.get("THREATTRON_EMAIL_ENABLED", "true").lower() == "true"
 
 event_queue = Queue()
 HOSTNAME = socket.gethostname()
@@ -21,7 +19,8 @@ def event_callback(event):
     event["hostname"] = HOSTNAME
     event_queue.put(event)
 
-def run_agent():
+def run_agent(stop_event=None):
+    stop_event = stop_event or threading.Event()
     session_event = base_event("session_started")
     session_event["hostname"] = HOSTNAME
     session_event["metadata"] = agent_session.to_dict()
@@ -31,38 +30,41 @@ def run_agent():
         pass
     
     file_monitor = FileMonitor(MONITORED_DIRECTORIES, event_callback, worker_count=THREAD_POOL_SIZE)
-    file_monitor.start()
+    usb_monitor = USBMonitor(event_callback, stop_event=stop_event)
+    process_monitor = ProcessMonitor(event_callback, interval=10, stop_event=stop_event)
+    network_monitor = NetworkMonitor(event_callback, interval=15, stop_event=stop_event)
+    monitors = [file_monitor, usb_monitor, process_monitor, network_monitor]
 
-    usb_monitor = USBMonitor(event_callback)
-    usb_monitor.start()
+    try:
+        for monitor in monitors:
+            monitor.start()
 
-    process_monitor = ProcessMonitor(event_callback, interval=10)
-    process_monitor.start()
+        while not stop_event.is_set():
+            events = []
 
-    network_monitor = NetworkMonitor(event_callback, interval=15)
-    network_monitor.start()
+            try:
+                while True:
+                    events.append(event_queue.get_nowait())
+            except Empty:
+                pass
 
-    email_monitor = EmailMonitor(event_callback, interval = 30)
-    email_monitor.start()
+            system_events = collect_system_activity()
+            for event in system_events:
+                event["hostname"] = HOSTNAME
+            events.extend(system_events)
 
-    while True:
-        events = []
-        
-        try:
-            while True:
-                events.append(event_queue.get_nowait())
-        except Empty:
-            pass
+            if events:
+                send_events(events)
 
-        system_events = collect_system_activity()
-        for e in system_events:
-            e["hostname"] = HOSTNAME
-        events.extend(system_events)
+            stop_event.wait(10)
+    finally:
+        for monitor in monitors:
+            monitor.stop()
 
-        if events:
-            send_events(events)
-            
-        time.sleep(10)
+        stopped_event = base_event("session_stopped")
+        stopped_event["hostname"] = HOSTNAME
+        stopped_event["metadata"] = agent_session.to_dict()
+        send_events([stopped_event])
 
 if __name__ == "__main__":
     run_agent()

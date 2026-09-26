@@ -1,0 +1,6 @@
+.venv/
+dist/
+__pycache__/
+*.pyc
+config/monitor_config.json
+config/service_settings.json

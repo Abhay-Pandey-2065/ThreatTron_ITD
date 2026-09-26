@@ -42,9 +42,11 @@ def _is_suspicious_spawn(child_name: str, parent_name) -> bool:
 
 class ProcessMonitor:
 
-    def __init__(self, event_callback, interval=10):
+    def __init__(self, event_callback, interval=10, stop_event=None):
         self.event_callback = event_callback
         self.interval = interval
+        self.stop_event = stop_event or threading.Event()
+        self.thread = None
         self.baseline = self._capture_current_processes()
 
     def _capture_current_processes(self):
@@ -70,12 +72,16 @@ class ProcessMonitor:
     
     def start(self):
         # self._log_startup_snapshot()
-        thread = threading.Thread(target = self._monitor_loop)
-        thread.daemon = True
-        thread.start()
+        self.thread = threading.Thread(target=self._monitor_loop, name="process-monitor", daemon=True)
+        self.thread.start()
+
+    def stop(self):
+        self.stop_event.set()
+        if self.thread is not None:
+            self.thread.join(timeout=self.interval + 1)
 
     def _monitor_loop(self):
-        while True:
+        while not self.stop_event.is_set():
             current = self._capture_current_processes()
 
             new_pids = set(current) - set(self.baseline)
@@ -115,4 +121,4 @@ class ProcessMonitor:
                 self.event_callback(event)
 
             self.baseline = current
-            time.sleep(self.interval)
+            self.stop_event.wait(self.interval)
