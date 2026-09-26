@@ -168,6 +168,168 @@
   font-size: 0.8125rem;
 }
 
+.tt-workflow-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.tt-soc-panel {
+  padding: 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+}
+
+.tt-soc-panel h2,
+.tt-soc-panel h3,
+.tt-soc-panel h4 {
+  margin-top: 0;
+}
+
+.tt-workflow-layout > p {
+  grid-column: 1 / -1;
+}
+
+.tt-workflow-layout dl {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.7fr) 1fr;
+  gap: 0.6rem 1rem;
+}
+
+.tt-workflow-layout dt {
+  color: var(--text-muted);
+}
+
+.tt-workflow-layout dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.tt-workflow-notes {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+.tt-workflow-list {
+  display: grid;
+  gap: 0.7rem;
+  padding-left: 1.2rem;
+}
+
+.tt-workflow-list li span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.tt-simulation-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  margin: 1rem 0;
+  border: 1px solid var(--accent-border);
+  border-left: 4px solid var(--accent);
+  border-radius: 6px;
+  background: var(--accent-bg);
+}
+
+.tt-simulation-banner strong,
+.tt-simulation-label {
+  color: var(--accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.tt-alert-actions {
+  display: grid;
+  gap: 0.45rem;
+  min-width: 12rem;
+}
+
+.tt-sandbox-alert {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.tt-sandbox-note {
+  padding: 0.65rem;
+  border-left: 3px solid var(--accent);
+  background: var(--code-bg);
+  overflow-wrap: anywhere;
+}
+
+.tt-sandbox-note span {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.tt-sandbox-form {
+  max-width: 54rem;
+  margin-bottom: 2rem;
+}
+
+.tt-sandbox-factors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0.8rem 1rem 1rem;
+  margin: 1rem 0;
+}
+
+.tt-sandbox-factors label {
+  font-size: 0.9rem;
+}
+
+.tt-sandbox-cases {
+  display: grid;
+  gap: 1rem;
+}
+
+.tt-sandbox-cases > h2 {
+  margin: 0;
+}
+
+.tt-sandbox-case header,
+.tt-sandbox-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.tt-sandbox-case h3 {
+  margin: 0.3rem 0;
+}
+
+.tt-sandbox-case p {
+  overflow-wrap: anywhere;
+}
+
+.tt-status-pill {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 720px) {
+  .tt-workflow-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 640px) {
   .tt-event-filters .tt-filter,
   .tt-event-filters .tt-filter:first-child {

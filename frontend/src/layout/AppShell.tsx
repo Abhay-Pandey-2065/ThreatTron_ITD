@@ -50,6 +50,15 @@ function AppShellLayout() {
           <NavLink to={navTo('/overview')} className={sideNavClass} end>
             Overview
           </NavLink>
+          <NavLink to={navTo('/alerts')} className={sideNavClass}>
+            Alerts
+          </NavLink>
+          <NavLink to={navTo('/investigations')} className={sideNavClass}>
+            Investigations
+          </NavLink>
+          <NavLink to={navTo('/workflow-sandbox')} className={sideNavClass}>
+            Workflow Sandbox
+          </NavLink>
           <NavLink to={navTo('/files')} className={sideNavClass}>
             Files
           </NavLink>
@@ -58,9 +67,6 @@ function AppShellLayout() {
           </NavLink>
           <NavLink to={navTo('/system')} className={sideNavClass}>
             System
-          </NavLink>
-          <NavLink to={navTo('/email')} className={sideNavClass}>
-            Email
           </NavLink>
           <NavLink to={navTo('/usb')} className={sideNavClass}>
             USB

@@ -1,14 +1,12 @@
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import {
-  fetchEmailEvents,
   fetchFileEvents,
   fetchNetworkEvents,
   fetchOverviewStats,
   fetchProcessEvents,
   fetchSystemEvents,
   fetchUSBEvents,
-  type EmailEventRow,
   type FileEventRow,
   type NetworkEventRow,
   type ProcessEventRow,
@@ -25,7 +23,6 @@ type LookupData = {
   files: WithLocalSession<FileEventRow>[]
   processes: WithLocalSession<ProcessEventRow>[]
   systems: WithLocalSession<SystemEventRow>[]
-  emails: WithLocalSession<EmailEventRow>[]
   usb: WithLocalSession<USBEventRow>[]
   network: WithLocalSession<NetworkEventRow>[]
   sessions: string[]
@@ -54,12 +51,11 @@ export function AdminHomePage() {
     setError(null)
     try {
       const q = { time_range: '7d', agent_id: targetAgentId, limit: 500 }
-      const [stats, files, processes, systems, emails, usb, network] = await Promise.all([
+      const [stats, files, processes, systems, usb, network] = await Promise.all([
         fetchOverviewStats({ time_range: '7d', agent_id: targetAgentId }),
         fetchFileEvents(q),
         fetchProcessEvents(q),
         fetchSystemEvents(q),
-        fetchEmailEvents(q),
         fetchUSBEvents(q),
         fetchNetworkEvents(q),
       ])
@@ -90,7 +86,6 @@ export function AdminHomePage() {
       pushEvents('files', files)
       pushEvents('processes', processes)
       pushEvents('systems', systems)
-      pushEvents('emails', emails)
       pushEvents('usb', usb)
       pushEvents('network', network)
 
@@ -101,7 +96,6 @@ export function AdminHomePage() {
         files: [] as WithLocalSession<FileEventRow>[],
         processes: [] as WithLocalSession<ProcessEventRow>[],
         systems: [] as WithLocalSession<SystemEventRow>[],
-        emails: [] as WithLocalSession<EmailEventRow>[],
         usb: [] as WithLocalSession<USBEventRow>[],
         network: [] as WithLocalSession<NetworkEventRow>[]
       }
@@ -154,7 +148,6 @@ export function AdminHomePage() {
         files: clusteredData.files,
         processes: clusteredData.processes,
         systems: clusteredData.systems,
-        emails: clusteredData.emails,
         usb: clusteredData.usb,
         network: clusteredData.network,
         sessions: sessionsArr
@@ -197,7 +190,6 @@ export function AdminHomePage() {
       files: data.files.filter(e => matchSession(e.__local_session_id)),
       processes: data.processes.filter(e => matchSession(e.__local_session_id)),
       systems: data.systems.filter(e => matchSession(e.__local_session_id)),
-      emails: data.emails.filter(e => matchSession(e.__local_session_id)),
       usb: data.usb.filter(e => matchSession(e.__local_session_id)),
       network: data.network.filter(e => matchSession(e.__local_session_id)),
     }
@@ -339,35 +331,6 @@ export function AdminHomePage() {
                 </section>
               )}
 
-              {activeData.emails.length > 0 && (
-                <section className="tt-dash__section">
-                  <h2 className="tt-dash__h2">Emails ({activeData.emails.length})</h2>
-                  <div className="tt-table-wrap">
-                    <table className="tt-table">
-                      <thead>
-                        <tr>
-                          <th>ID</th>
-                          <th>Time</th>
-                          <th>Sender</th>
-                          <th>Subject</th>
-                          <th>Body</th>
-                          <th>Classified</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeData.emails.map((e) => (
-                          <tr key={`e-${e.id}`}>
-                            <td className="tt-table-cell--mono tt-table-cell--nowrap">{formatTime(e.timestamp)}</td>
-                            <td>{e.sender ?? '—'}</td>
-                            <td>{e.subject ?? '—'}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </section>
-              )}
-
               {activeData.systems.length > 0 && (
                 <section className="tt-dash__section">
                   <h2 className="tt-dash__h2">System Records ({activeData.systems.length})</h2>
@@ -423,7 +386,6 @@ export function AdminHomePage() {
               {!activeData.processes.length &&
                !activeData.files.length &&
                !activeData.network.length &&
-               !activeData.emails.length &&
                !activeData.systems.length &&
                !activeData.usb.length && (
                  <p className="tt-dash__muted">No records matched for this session.</p>

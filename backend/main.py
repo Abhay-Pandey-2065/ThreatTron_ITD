@@ -15,17 +15,21 @@ from routes import system as system_routes
 from routes import usb as usb_routes
 from routes import network as network_routes
 from routes import auth as auth_routes
+from routes import security as security_routes
 import email_api
 
 import httpx
 from collections import deque
 import requests
 
-# Create tables
-Base.metadata.create_all(bind=engine)
-engine.dispose()
-
 app = FastAPI()
+
+
+@app.on_event("startup")
+def create_database_tables():
+    # create_all only creates missing tables; existing telemetry and workflow data remain intact.
+    # This recreates workflow tables if they were dropped in TiDB.
+    Base.metadata.create_all(bind=engine)
 
 # CORS - get allowed origins from environment variable
 ALLOWED_ORIGINS = os.getenv(
@@ -49,6 +53,7 @@ app.include_router(system_routes.router, prefix="/api/events/system", tags=["sys
 app.include_router(usb_routes.router, prefix="/api/events/usb", tags=["usb"])
 app.include_router(network_routes.router, prefix="/api/events/network", tags=["network"])
 app.include_router(auth_routes.router, prefix="/api/auth", tags=["auth"])
+app.include_router(security_routes.router, prefix="/api/security", tags=["security"])
 app.include_router(email_api.router, prefix="/api/emails", tags=["email-api"])
 
 
@@ -178,44 +183,6 @@ def overview_recent(
         # Sort all by timestamp desc, take top N
         results.sort(key=lambda x: x["timestamp"], reverse=True)
         return {"events": results[:limit]}
-    finally:
-        db.close()
-
-
-@app.get("/api/risk")
-def get_live_risk(agent_id: Optional[str] = Query(None)):
-    db: Session = SessionLocal()
-    try:
-        def get_count(model, condition=None):
-            q = db.query(model)
-            if agent_id:
-                q = q.filter(model.agent_id == agent_id)
-            if condition is not None:
-                q = q.filter(condition)
-            return q.count()
-
-        # Build the exact JSON shape the ML API requested using LIVE SQL Database counts!
-        payload = {
-            "user_id": agent_id or "Global",
-            "total_logons": 5, 
-            "after_hours_logons": 0,
-            "total_emails": get_count(EmailEvent),
-            "emails_with_attachments": get_count(EmailEvent, EmailEvent.has_links == True),
-            "total_http": get_count(NetworkEvent),
-            "suspicious_http": 0,
-            "total_file": get_count(FileEvent),
-            "exe_zip_files": get_count(FileEvent, FileEvent.file_path.ilike("%exe")),
-            "total_device": get_count(USBEvent)
-        }
-
-        # Send it to your Render Cloud API securely
-        try:
-            render_url = "https://ml-api-2ru4.onrender.com/predict"
-            response = requests.post(render_url, json=payload, timeout=5)
-            return response.json()
-        except Exception as e:
-            # Fallback if Render is asleep
-            return {"status": "error", "message": f"ML API Offline: {e}", "risk_score": 0.0, "is_threat": False}
     finally:
         db.close()
 
@@ -401,6 +368,9 @@ async def live_risk(
             ml_resp = await client.post(ML_API_URL, json=payload)
             ml_data = ml_resp.json()
 
+        # Risk scores are exposed and persisted on the documented normalized 0..1 scale.
+        ml_data["risk_score"] = security_routes.normalize_risk_score(ml_data.get("risk_score"))
+
         # ── trend tracking ────────────────────────────────────────────────────
         score = ml_data.get("risk_score", 0)
         hist  = _score_history.setdefault(agent_id, deque(maxlen=12))
@@ -422,6 +392,8 @@ async def live_risk(
             "trend":         trend,
             "last_alert":    _last_alert.get(agent_id),
         })
+        evidence_refs = _risk_evidence_refs(db, agent_id, cutoff)
+        security_routes.record_risk_assessment(db, agent_id, ml_data, evidence_refs)
         return ml_data
 
     except Exception as exc:
@@ -434,6 +406,31 @@ async def live_risk(
         }
     finally:
         db.close()
+
+
+def _risk_evidence_refs(db: Session, agent_id: str, cutoff: datetime):
+    evidence = []
+    candidates = (
+        (ProcessEvent, ProcessEvent.suspicious_spawn == True, "process"),
+        (
+            FileEvent,
+            FileEvent.file_path.ilike("%.exe")
+            | FileEvent.file_path.ilike("%.zip")
+            | FileEvent.file_path.ilike("%.rar"),
+            "file",
+        ),
+        (NetworkEvent, NetworkEvent.remote_port.in_([4444, 8080, 9090, 31337]), "network"),
+        (USBEvent, None, "usb"),
+    )
+    for model, condition, event_type in candidates:
+        query = db.query(model.id).filter(model.timestamp >= cutoff)
+        if agent_id != "Global":
+            query = query.filter(model.agent_id == agent_id)
+        if condition is not None:
+            query = query.filter(condition)
+        for (event_id,) in query.order_by(model.timestamp.desc()).limit(5).all():
+            evidence.append({"type": event_type, "id": event_id})
+    return evidence[:20]
 
 @app.get("/ml/summary")
 async def ml_summary(time_range: str = Query("24h")):

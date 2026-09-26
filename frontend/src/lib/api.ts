@@ -64,19 +64,6 @@ export interface SystemEventRow {
   memory_usage: number | null
 }
 
-export interface EmailEventRow {
-  id: number
-  agent_id: string
-  session_id?: string | null
-  timestamp: string
-  sender: string | null
-  subject: string | null
-  snippet_length: number | null
-  has_links: boolean | null
-  body?: string | null
-  classified?: string | number | boolean | null
-}
-
 export interface USBEventRow {
   id: number
   agent_id: string
@@ -150,17 +137,6 @@ export async function fetchSystemEvents(q: EventsQuery): Promise<SystemEventRow[
   }
 }
 
-export async function fetchEmailEvents(q: EventsQuery): Promise<EmailEventRow[]> {
-  try {
-    const data = await fetchJson<{ items?: EmailEventRow[]; events?: EmailEventRow[] }>(
-      `/api/events/emails${buildQuery(q)}`,
-    )
-    return data.items ?? data.events ?? []
-  } catch {
-    return []
-  }
-}
-
 export async function fetchUSBEvents(q: EventsQuery): Promise<USBEventRow[]> {
   try {
     const data = await fetchJson<{ items?: USBEventRow[]; events?: USBEventRow[] }>(
@@ -198,7 +174,7 @@ export async function fetchOverviewStats(q: EventsQuery): Promise<OverviewStats 
 }
 
 export interface RecentEvent {
-  type: 'file' | 'process' | 'system' | 'email' | 'usb' | 'network'
+  type: 'file' | 'process' | 'system' | 'usb' | 'network'
   id: number
   agent_id: string
   timestamp: string
@@ -320,4 +296,217 @@ export interface RiskResponse {
 
 export async function fetchLiveRisk(agentId: string, window: number): Promise<RiskResponse> {
   return await fetchJson<RiskResponse>(`/api/risk?agent_id=${agentId}&window=${window}`)
+}
+
+export type AlertStatus = 'open' | 'acknowledged' | 'investigating' | 'resolved' | 'false_positive'
+export type InvestigationStatus = 'open' | 'in_progress' | 'resolved'
+
+export interface SecurityAlert {
+  id: number
+  agent_id: string
+  title: string
+  risk_score: number
+  severity: string
+  evidence_refs: { type: string; id: number }[]
+  status: AlertStatus
+  false_positive: boolean
+  feedback: string | null
+  created_at: string
+  updated_at: string
+  last_seen_at: string
+}
+
+export interface SecurityEvidence {
+  type: string
+  id: number
+}
+
+export interface InvestigationRecord {
+  id: number
+  alert_id: number
+  title: string
+  status: InvestigationStatus
+  alert?: SecurityAlert | null
+  created_at: string
+  updated_at: string
+  notes: { id: number; body: string; created_at: string }[]
+  evidence_refs: SecurityEvidence[]
+  timeline: WorkflowAuditRecord[]
+}
+
+export interface WorkflowAuditRecord {
+  id: number
+  entity_type: string
+  entity_id: number
+  actor_user_id: number | null
+  actor_email: string | null
+  action: string
+  details: Record<string, unknown> | null
+  is_simulation?: true
+  created_at: string
+}
+
+export interface SandboxScenario {
+  id: number
+  agent_id: string
+  title: string
+  risk_score: number
+  is_threat: boolean
+  rules_triggered: string[]
+  evidence_refs: SecurityEvidence[]
+  timeline: WorkflowAuditRecord[]
+  is_simulation: true
+  created_at: string
+  alert: SandboxAlert | null
+}
+
+export interface SandboxAlert {
+  id: number
+  case_id: number
+  title: string
+  severity: string
+  risk_score: number
+  status: AlertStatus
+  false_positive: boolean
+  feedback: string | null
+  is_simulation: true
+  created_at: string
+  updated_at: string
+}
+
+export interface SandboxInvestigation {
+  id: number
+  alert_id: number
+  title: string
+  status: InvestigationStatus
+  is_simulation: true
+  created_at: string
+  updated_at: string
+  alert: SandboxAlert | null
+  evidence_refs: SecurityEvidence[]
+  notes: { id: number; body: string; created_at: string; is_simulation: true }[]
+  timeline: WorkflowAuditRecord[]
+}
+
+export async function fetchSecurityAlerts(): Promise<SecurityAlert[]> {
+  const data = await fetchJson<{ alerts?: SecurityAlert[] }>('/api/security/alerts')
+  return data.alerts ?? []
+}
+
+export async function updateSecurityAlertStatus(alertId: number, status: AlertStatus): Promise<SecurityAlert> {
+  return await fetchJson<SecurityAlert>(`/api/security/alerts/${alertId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+}
+
+export async function submitSecurityFeedback(alertId: number, verdict: 'false_positive' | 'confirmed', note?: string): Promise<SecurityAlert> {
+  return await fetchJson<SecurityAlert>(`/api/security/alerts/${alertId}/feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ verdict, note }),
+  })
+}
+
+export async function fetchInvestigations(): Promise<InvestigationRecord[]> {
+  const data = await fetchJson<{ investigations?: InvestigationRecord[] }>('/api/security/investigations')
+  return data.investigations ?? []
+}
+
+export async function fetchInvestigation(id: string): Promise<InvestigationRecord> {
+  return await fetchJson<InvestigationRecord>(`/api/security/investigations/${encodeURIComponent(id)}`)
+}
+
+export async function createInvestigation(alertId: number): Promise<InvestigationRecord> {
+  return await fetchJson<InvestigationRecord>('/api/security/investigations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ alert_id: alertId }),
+  })
+}
+
+export async function updateInvestigation(id: string, update: { status: InvestigationStatus; note?: string }): Promise<InvestigationRecord> {
+  return await fetchJson<InvestigationRecord>(`/api/security/investigations/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(update),
+  })
+}
+
+export async function addInvestigationNote(id: number, body: string): Promise<{ id: number; investigation_id: number; body: string; created_at: string }> {
+  return await fetchJson(`/api/security/investigations/${id}/notes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body }),
+  })
+}
+
+export async function fetchWorkflowAudit(entityType: string, entityId: number): Promise<WorkflowAuditRecord[]> {
+  const query = new URLSearchParams({ entity_type: entityType, entity_id: String(entityId) })
+  const data = await fetchJson<{ events?: WorkflowAuditRecord[] }>(`/api/security/audit?${query}`)
+  return data.events ?? []
+}
+
+export async function fetchSandboxScenarios(): Promise<SandboxScenario[]> {
+  const data = await fetchJson<{ cases?: SandboxScenario[] }>('/api/security/sandbox/cases')
+  return data.cases ?? []
+}
+
+export async function createSandboxScenario(payload: { scenario: string; risk_score: number; rules_triggered: string[] }): Promise<SandboxScenario> {
+  return await fetchJson<SandboxScenario>('/api/security/sandbox/cases', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+}
+
+export async function updateSandboxInvestigation(id: number, status: InvestigationStatus, note?: string): Promise<SandboxInvestigation> {
+  return await fetchJson<SandboxInvestigation>(`/api/security/sandbox/investigations/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, note }),
+  })
+}
+
+export async function updateSandboxAlert(id: number, status: AlertStatus, note?: string): Promise<SandboxAlert> {
+  return await fetchJson<SandboxAlert>(`/api/security/sandbox/alerts/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, note }),
+  })
+}
+
+export async function submitSandboxFeedback(id: number, verdict: 'false_positive' | 'confirmed', note?: string): Promise<SandboxAlert> {
+  return await fetchJson<SandboxAlert>(`/api/security/sandbox/alerts/${id}/feedback`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ verdict, note }),
+  })
+}
+
+export async function createSandboxInvestigation(alertId: number): Promise<SandboxInvestigation> {
+  return await fetchJson<SandboxInvestigation>('/api/security/sandbox/investigations', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ alert_id: alertId }),
+  })
+}
+
+export async function addSandboxInvestigationNote(id: number, body: string): Promise<SandboxInvestigation> {
+  return await fetchJson<SandboxInvestigation>(`/api/security/sandbox/investigations/${id}/notes`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ body }),
+  })
+}
+
+export async function fetchSandboxInvestigations(): Promise<SandboxInvestigation[]> {
+  const data = await fetchJson<{ investigations?: SandboxInvestigation[] }>('/api/security/sandbox/investigations')
+  return data.investigations ?? []
+}
+
+export async function fetchSandboxAudit(): Promise<WorkflowAuditRecord[]> {
+  const data = await fetchJson<{ events?: WorkflowAuditRecord[] }>('/api/security/sandbox/audit')
+  return data.events ?? []
 }

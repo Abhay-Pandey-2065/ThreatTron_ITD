@@ -1,5 +1,6 @@
 import os
 from sqlalchemy import create_engine
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 from urllib.parse import quote_plus
@@ -22,12 +23,31 @@ DATABASE_URL = os.getenv("DATABASE_URL") or (
     f"mysql+pymysql://{DB_USER}:{encoded_password}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
 
-# Aiven MySQL requires SSL. Detect Aiven host automatically.
-_is_aiven = "aivencloud.com" in DATABASE_URL
-_connect_args = {"ssl": {"ssl_mode": "REQUIRED"}} if _is_aiven else {}
+database_url = make_url(DATABASE_URL)
+if database_url.drivername == "mysql":
+    database_url = database_url.set(drivername="mysql+pymysql")
+
+ssl_mode = database_url.query.get("ssl-mode")
+if ssl_mode:
+    query = dict(database_url.query)
+    query.pop("ssl-mode", None)
+    database_url = database_url.set(query=query)
+
+    mode = ssl_mode.upper()
+    if mode not in {"DISABLED", "PREFERRED", "REQUIRED", "VERIFY_CA", "VERIFY_IDENTITY"}:
+        raise ValueError("Unsupported MySQL ssl-mode")
+    _connect_args = {}
+    if mode != "DISABLED":
+        _connect_args = {"ssl": {
+            "ssl_verify_cert": mode in {"VERIFY_CA", "VERIFY_IDENTITY"},
+            "ssl_verify_identity": mode == "VERIFY_IDENTITY",
+        }}
+else:
+    _is_aiven = "aivencloud.com" in (database_url.host or "")
+    _connect_args = {"ssl": {"ssl_verify_cert": False}} if _is_aiven else {}
 
 engine = create_engine(
-    DATABASE_URL,
+    database_url,
     pool_pre_ping=True,
     pool_recycle=300,
     connect_args=_connect_args,

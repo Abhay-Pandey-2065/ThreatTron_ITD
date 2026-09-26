@@ -4,6 +4,10 @@ from database import Base
 from datetime import datetime, timezone
 
 
+def _utcnow():
+    return datetime.now(timezone.utc).replace(tzinfo=None)
+
+
 class AgentSession(Base):
     __tablename__ = "agent_sessions"
 
@@ -120,6 +124,138 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     role = Column(String(50), default="user") # 'admin' or 'user'
     created_at = Column(DateTime, default=datetime.now(timezone.utc))
+
+
+class RiskAssessment(Base):
+    __tablename__ = "risk_assessments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    agent_id = Column(String(50), nullable=False, index=True)
+    risk_score = Column(Float, nullable=False, default=0)
+    is_threat = Column(Boolean, nullable=False, default=False)
+    ml_score = Column(Float, nullable=True)
+    rule_score = Column(Float, nullable=True)
+    rules_triggered = Column(JSON, nullable=False, default=list)
+    evidence_refs = Column(JSON, nullable=False, default=list)
+    result = Column(JSON, nullable=False, default=dict)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+
+
+class Alert(Base):
+    __tablename__ = "alerts"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    fingerprint = Column(String(64), nullable=False, index=True)
+    agent_id = Column(String(50), nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    severity = Column(String(20), nullable=False, default="medium")
+    risk_score = Column(Float, nullable=False, default=0)
+    status = Column(String(30), nullable=False, default="open", index=True)
+    false_positive = Column(Boolean, nullable=False, default=False)
+    feedback = Column(Text, nullable=True)
+    evidence_refs = Column(JSON, nullable=False, default=list)
+    latest_assessment_id = Column(Integer, ForeignKey("risk_assessments.id"), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=_utcnow)
+    last_seen_at = Column(DateTime, nullable=False, default=_utcnow)
+
+
+class Investigation(Base):
+    __tablename__ = "investigations"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    alert_id = Column(Integer, ForeignKey("alerts.id"), nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    status = Column(String(30), nullable=False, default="open", index=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=_utcnow)
+
+
+class InvestigationNote(Base):
+    __tablename__ = "investigation_notes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    investigation_id = Column(Integer, ForeignKey("investigations.id"), nullable=False, index=True)
+    body = Column(Text, nullable=False)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+
+
+class AuditEvent(Base):
+    __tablename__ = "audit_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    entity_type = Column(String(40), nullable=False, index=True)
+    entity_id = Column(Integer, nullable=False, index=True)
+    action = Column(String(80), nullable=False)
+    details = Column(JSON, nullable=False, default=dict)
+    actor_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    actor_email = Column(String(255), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+
+
+class SandboxRiskCase(Base):
+    __tablename__ = "sandbox_risk_cases"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    agent_id = Column(String(50), nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    risk_score = Column(Float, nullable=False)
+    is_threat = Column(Boolean, nullable=False, default=False)
+    rules_triggered = Column(JSON, nullable=False, default=list)
+    is_simulation = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+
+
+class SandboxAlert(Base):
+    __tablename__ = "sandbox_alerts"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    case_id = Column(Integer, ForeignKey("sandbox_risk_cases.id"), nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    severity = Column(String(20), nullable=False)
+    risk_score = Column(Float, nullable=False)
+    status = Column(String(30), nullable=False, default="open", index=True)
+    false_positive = Column(Boolean, nullable=False, default=False)
+    feedback = Column(Text, nullable=True)
+    is_simulation = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=_utcnow)
+
+
+class SandboxInvestigation(Base):
+    __tablename__ = "sandbox_investigations"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    alert_id = Column(Integer, ForeignKey("sandbox_alerts.id"), nullable=False, index=True)
+    title = Column(String(255), nullable=False)
+    status = Column(String(30), nullable=False, default="open", index=True)
+    is_simulation = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+    updated_at = Column(DateTime, nullable=False, default=_utcnow)
+
+
+class SandboxInvestigationNote(Base):
+    __tablename__ = "sandbox_investigation_notes"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    investigation_id = Column(Integer, ForeignKey("sandbox_investigations.id"), nullable=False, index=True)
+    body = Column(Text, nullable=False)
+    is_simulation = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
+
+
+class SandboxAuditEvent(Base):
+    __tablename__ = "sandbox_audit_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    entity_type = Column(String(40), nullable=False, index=True)
+    entity_id = Column(Integer, nullable=False, index=True)
+    action = Column(String(80), nullable=False)
+    details = Column(JSON, nullable=False, default=dict)
+    actor_user_id = Column(Integer, nullable=True)
+    actor_email = Column(String(255), nullable=True)
+    is_simulation = Column(Boolean, nullable=False, default=True)
+    created_at = Column(DateTime, nullable=False, default=_utcnow, index=True)
 
 
 

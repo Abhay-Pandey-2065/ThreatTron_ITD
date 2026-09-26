@@ -3,7 +3,6 @@ import { AdminRoute } from '../auth/AdminRoute'
 import { AuthPortalPage } from '../auth/pages/AuthPortalPage'
 import { ProtectedRoute } from '../auth/ProtectedRoute'
 import { AppShell } from '../layout/AppShell'
-import { EmailPage } from '../features/email/EmailPage'
 import { FilesPage } from '../features/files/FilesPage'
 import { ForbiddenPage } from '../pages/ForbiddenPage'
 import { ForgotPasswordPage } from '../pages/ForgotPasswordPage'
@@ -17,6 +16,9 @@ import { ResetPasswordPage } from '../pages/ResetPasswordPage'
 import { SystemPage } from '../features/system/SystemPage'
 import { USBPage } from '../features/usb/USBPage'
 import { AdminHomePage } from '../pages/AdminHomePage'
+import { AlertsPage } from '../pages/AlertsPage'
+import { InvestigationsPage } from '../pages/InvestigationsPage'
+import { WorkflowSandboxPage } from '../pages/WorkflowSandboxPage'
 
 export default function App() {
   return (
@@ -30,10 +32,13 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppShell />}>
           <Route path="/overview" element={<OverviewHomePage />} />
+          <Route path="/alerts" element={<AlertsPage />} />
+          <Route path="/investigations" element={<InvestigationsPage />} />
+          <Route path="/investigations/:investigationId" element={<InvestigationsPage />} />
+          <Route path="/workflow-sandbox" element={<WorkflowSandboxPage />} />
           <Route path="/files" element={<FilesPage />} />
           <Route path="/processes" element={<ProcessesPage />} />
           <Route path="/system" element={<SystemPage />} />
-          <Route path="/email" element={<EmailPage />} />
           <Route path="/usb" element={<USBPage />} />
           <Route path="/network" element={<NetworkPage />} />
           <Route path="/ml" element={<MLInsightsPage />} />
