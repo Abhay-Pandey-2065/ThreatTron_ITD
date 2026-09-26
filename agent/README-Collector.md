@@ -4,6 +4,9 @@ This agent runs quietly as a Windows service, starts automatically with Windows,
 
 Only install it on a computer you own or are authorized to monitor. The installer asks which folders to watch; review that list before confirming.
 
+> [!WARNING]
+> The Windows service background process is currently not working. Do **not** download or use `ThreatTronAgent.zip` until this issue has been resolved.
+
 ## Easiest way to download
 
 ### Download a ready-to-install ZIP from GitHub
