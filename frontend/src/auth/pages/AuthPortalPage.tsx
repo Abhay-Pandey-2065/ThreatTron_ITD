@@ -12,8 +12,6 @@ const portalCopy: Record<
     subtitle: string
     signInHeading: string
     signUpHeading: string
-    demoTitle: string
-    demoNote: string
   }
 > = {
   user: {
@@ -21,18 +19,12 @@ const portalCopy: Record<
     subtitle: 'User console — sign in to access your account.',
     signInHeading: 'User sign in',
     signUpHeading: 'User sign up',
-    demoTitle: 'User demo (any non-empty password)',
-    demoNote:
-      'Accounts are stored in this browser until the API is connected. Reserved demo emails cannot be used for sign-up.',
   },
   admin: {
     title: 'ThreatTron',
     subtitle: 'Administrator console — sign in or register an admin account.',
     signInHeading: 'Administrator sign in',
     signUpHeading: 'Administrator sign up',
-    demoTitle: 'Administrator demo (any non-empty password)',
-    demoNote:
-      'Admin registrations are for local demo only. Connect a real backend before production use.',
   },
 }
 
@@ -270,23 +262,6 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
             </p>
           </section>
         )}
-
-        <div className="tt-login__demo">
-          <p className="tt-login__demo-title">{copy.demoTitle}</p>
-          <ul>
-            {portal === 'user' ? (
-              <li>
-                <code>user@threattron.local</code> — standard user
-              </li>
-            ) : (
-              <li>
-                <code>admin@threattron.local</code> — administrator
-              </li>
-            )}
-          </ul>
-          <p className="tt-login__note">{copy.demoNote}</p>
-        </div>
-
 
       </div>
     </div>

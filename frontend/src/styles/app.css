@@ -227,13 +227,8 @@ button.tt-link--button:hover {
 .tt-landing__cards {
   display: grid;
   gap: 1rem;
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 520px) {
-  .tt-landing__cards {
-    grid-template-columns: 1fr 1fr;
-  }
+  grid-template-columns: minmax(0, 17.5rem);
+  justify-content: center;
 }
 
 .tt-landing__card {
@@ -379,39 +374,6 @@ button.tt-link--button:hover {
   margin: 0;
   font-size: 0.875rem;
   color: #f87171;
-}
-
-.tt-login__demo {
-  margin-top: 1.75rem;
-  padding-top: 1.25rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.8125rem;
-  color: var(--text);
-  text-align: left;
-}
-
-.tt-login__demo-title {
-  margin: 0 0 0.5rem;
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-.tt-login__demo ul {
-  margin: 0;
-  padding-left: 1.25rem;
-}
-
-.tt-login__demo li {
-  margin-bottom: 0.35rem;
-}
-
-.tt-login__demo code {
-  font-size: 0.75rem;
-}
-
-.tt-login__note {
-  margin: 0.75rem 0 0;
-  font-style: italic;
 }
 
 .tt-login__signed {

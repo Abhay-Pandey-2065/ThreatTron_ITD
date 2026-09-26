@@ -131,10 +131,6 @@ function AppShellLayout() {
 
         <footer className="tt-shell__footer">
           <span className="tt-shell__footer-version">ThreatTron console v{packageJson.version}</span>
-          <span className="tt-shell__footer-note">
-            Telemetry metadata only — no payload capture. ML and event APIs not connected in this
-            build.
-          </span>
         </footer>
       </div>
     </div>

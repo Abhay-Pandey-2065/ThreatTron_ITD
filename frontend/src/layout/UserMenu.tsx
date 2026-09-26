@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 
 export function UserMenu() {
   const { user, logout } = useAuth()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -66,6 +67,7 @@ export function UserMenu() {
             onClick={() => {
               setOpen(false)
               logout()
+              navigate('/', { replace: true })
             }}
           >
             Sign out
