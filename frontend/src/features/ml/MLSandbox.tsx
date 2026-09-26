@@ -1,23 +1,23 @@
 import React, { useState } from 'react';
 
-const FIELD_META: Record<string, { label: string; icon: string; description: string }> = {
-  total_logons:                 { label: 'Total Logons',              icon: '🔑', description: 'Total login events' },
-  after_hours_logons:           { label: 'After-Hours Logons',        icon: '🌙', description: 'Logins outside 6AM-7PM' },
-  weekend_logons:               { label: 'Weekend Logons',            icon: '🏖️', description: 'Logins on Sat/Sun' },
-  failed_logons:                { label: 'Failed Logons',             icon: '❌', description: 'Failed auth attempts' },
-  total_emails:                 { label: 'Total Emails',              icon: '📧', description: 'Outbound email count' },
-  emails_with_attachments:      { label: 'Emails w/ Attachments',     icon: '📎', description: 'Emails carrying files' },
-  external_emails:              { label: 'External Emails',           icon: '📤', description: 'Sent outside company domain' },
-  total_email_megabytes:        { label: 'Total Email MB',            icon: '📦', description: 'Total attachment volume in MB' },
-  total_http:                   { label: 'Total Web Hits',            icon: '🌐', description: 'Total outbound requests' },
-  suspicious_http:              { label: 'Suspicious Web',            icon: '⚠️', description: 'Visits to file-sharing/hacking sites' },
-  total_file:                   { label: 'Total File Ops',            icon: '📁', description: 'File read/write/move events' },
-  exe_zip_files:                { label: 'EXE / ZIP Ops',             icon: '🗜️', description: 'Executable or archive files' },
-  after_hours_file_ops:         { label: 'Night File Ops',            icon: '🕛', description: 'Files touched off-hours' },
-  total_device:                 { label: 'USB Device Events',         icon: '💾', description: 'External drive mount events' },
-  num_distinct_pcs:             { label: 'Distinct PCs Used',         icon: '💻', description: 'Number of machines logged into' },
-  unique_http_domains:          { label: 'Unique Web Domains',        icon: '🌍', description: 'Total different sites visited' },
-  unique_external_recipients:   { label: 'External Recipients',       icon: '👥', description: 'Unique external email addresses' },
+const FIELD_META: Record<string, { label: string; description: string }> = {
+  total_logons:                 { label: 'Total Logons', description: 'Total login events' },
+  after_hours_logons:           { label: 'After-Hours Logons', description: 'Logins outside 6AM-7PM' },
+  weekend_logons:               { label: 'Weekend Logons', description: 'Logins on Sat/Sun' },
+  failed_logons:                { label: 'Failed Logons', description: 'Failed auth attempts' },
+  total_emails:                 { label: 'Total Emails', description: 'Outbound email count' },
+  emails_with_attachments:      { label: 'Emails w/ Attachments', description: 'Emails carrying files' },
+  external_emails:              { label: 'External Emails', description: 'Sent outside company domain' },
+  total_email_megabytes:        { label: 'Total Email MB', description: 'Total attachment volume in MB' },
+  total_http:                   { label: 'Total Web Hits', description: 'Total outbound requests' },
+  suspicious_http:              { label: 'Suspicious Web', description: 'Visits to file-sharing/hacking sites' },
+  total_file:                   { label: 'Total File Ops', description: 'File read/write/move events' },
+  exe_zip_files:                { label: 'EXE / ZIP Ops', description: 'Executable or archive files' },
+  after_hours_file_ops:         { label: 'Night File Ops', description: 'Files touched off-hours' },
+  total_device:                 { label: 'USB Device Events', description: 'External drive mount events' },
+  num_distinct_pcs:             { label: 'Distinct PCs Used', description: 'Number of machines logged into' },
+  unique_http_domains:          { label: 'Unique Web Domains', description: 'Total different sites visited' },
+  unique_external_recipients:   { label: 'External Recipients', description: 'Unique external email addresses' },
 };
 
 const PRESETS = {
@@ -177,7 +177,7 @@ export function MLSandbox() {
             color: activePreset === key ? presetColors[key] : '#666', fontWeight: 600, fontSize: 13,
             cursor: 'pointer', transition: 'all 0.2s',
           }}>
-            {key === 'Normal' ? '🟢' : key === 'Suspicious' ? '🟡' : '🔴'} {key} Employee
+            {key} Employee
           </button>
         ))}
       </div>
@@ -187,14 +187,13 @@ export function MLSandbox() {
         {/* LEFT: Input Form */}
         <div style={{ background: '#0f0f0f', borderRadius: 12, border: '1px solid #1e1e1e', overflow: 'hidden' }}>
           <div style={{ padding: '14px 20px', borderBottom: '1px solid #1e1e1e', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#ccc' }}>📊 Behavioural Parameters</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#ccc' }}>Behavioural Parameters</span>
           </div>
           <form onSubmit={handleSubmit} style={{ padding: '16px 20px' }}>
             {Object.entries(formData).map(([key, val]) => {
-              const meta = FIELD_META[key] || { label: key, icon: '•', description: '' };
+              const meta = FIELD_META[key] || { label: key, description: '' };
               return (
                 <div key={key} style={{ display: 'flex', alignItems: 'center', marginBottom: 10, gap: 10 }}>
-                  <span style={{ width: 22, textAlign: 'center', fontSize: 15 }}>{meta.icon}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 12, color: '#888', marginBottom: 2 }}>{meta.label}</div>
                   </div>
@@ -222,7 +221,7 @@ export function MLSandbox() {
             }}>
               {loading ? (
                 <><span style={{ width: 16, height: 16, border: '2px solid #555', borderTopColor: '#888', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} /> Analysing Behaviour...</>
-              ) : '⚡ Run Threat Analysis'}
+              ) : 'Run Threat Analysis'}
             </button>
           </form>
         </div>
@@ -230,12 +229,11 @@ export function MLSandbox() {
         {/* RIGHT: Results Panel */}
         <div style={{ background: '#0f0f0f', borderRadius: 12, border: '1px solid #1e1e1e', overflow: 'hidden' }}>
           <div style={{ padding: '14px 20px', borderBottom: '1px solid #1e1e1e' }}>
-            <span style={{ fontSize: 14, fontWeight: 600, color: '#ccc' }}>🎯 Model Output</span>
+            <span style={{ fontSize: 14, fontWeight: 600, color: '#ccc' }}>Model Output</span>
           </div>
           <div style={{ padding: '16px 20px' }}>
             {!result && !loading && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 320, gap: 12 }}>
-                <div style={{ fontSize: 40 }}>🧠</div>
                 <div style={{ color: '#444', fontSize: 14 }}>Submit parameters to run inference</div>
               </div>
             )}
@@ -249,7 +247,7 @@ export function MLSandbox() {
               <>
                 {result.error ? (
                   <div style={{ color: '#ef4444', background: '#1a0000', padding: 16, borderRadius: 8, fontSize: 13 }}>
-                    ⚠️ {result.error}. <br /><br />
+                    {result.error}. <br /><br />
                     <span style={{ color: '#888' }}>Hint: The Render API may need a 30-second cold start. Wait and try again.</span>
                   </div>
                 ) : (
@@ -261,11 +259,11 @@ export function MLSandbox() {
                       {result.rules_triggered && result.rules_triggered.length > 0 && (
                         <div style={{ marginBottom: 16 }}>
                           <div style={{ fontSize: 11, color: '#f59e0b', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase' }}>
-                            🚨 Behavioral Rules Triggered
+                            Behavioral Rules Triggered
                           </div>
                           {result.rules_triggered.map((rule: string) => (
                             <div key={rule} style={{ padding: '4px 8px', background: '#f59e0b1a', color: '#f59e0b', border: '1px solid #f59e0b33', borderRadius: 4, fontSize: 12, display: 'inline-block', marginRight: 8, marginBottom: 8 }}>
-                                ⚠️ {RULE_DESCRIPTIONS[rule] || rule}
+                                {RULE_DESCRIPTIONS[rule] || rule}
                             </div>
                           ))}
                         </div>
@@ -283,14 +281,14 @@ export function MLSandbox() {
                       </div>
 
                       <div style={{ fontSize: 11, color: '#555', marginBottom: 10, letterSpacing: '0.8px', textTransform: 'uppercase' }}>ML Confidence (Under the hood)</div>
-                      <SubScoreBar label="🌲 LightGBM Gradient Boosting" value={result.sub_scores.lightgbm_confidence} color="#6366f1" />
-                      <SubScoreBar label="🌳 Random Forest" value={result.sub_scores.rf_confidence || 0} color="#10b981" />
-                      <SubScoreBar label="📈 Logistic Regression" value={result.sub_scores.lr_confidence || 0} color="#3b82f6" />
-                      <SubScoreBar label="🔍 Isolation Forest Anomaly" value={result.sub_scores.anomaly_confidence} color="#a78bfa" />
+                      <SubScoreBar label="LightGBM Gradient Boosting" value={result.sub_scores.lightgbm_confidence} color="#6366f1" />
+                      <SubScoreBar label="Random Forest" value={result.sub_scores.rf_confidence || 0} color="#10b981" />
+                      <SubScoreBar label="Logistic Regression" value={result.sub_scores.lr_confidence || 0} color="#3b82f6" />
+                      <SubScoreBar label="Isolation Forest Anomaly" value={result.sub_scores.anomaly_confidence} color="#a78bfa" />
                     </div>
                     
                     <div style={{ marginTop: 12, textAlign: 'center', fontSize: 12, color: '#22c55e' }}>
-                        ✓ API Connected ({result.status})
+                        API Connected ({result.status})
                     </div>
                   </>
                 )}

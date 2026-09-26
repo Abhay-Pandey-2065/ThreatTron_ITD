@@ -1,9 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { DomainPageLayout } from '../../shared/DomainPageLayout'
 import { EmptyState } from '../../shared/EmptyState'
 import { ErrorRetry } from '../../shared/ErrorRetry'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchNetworkEvents, type NetworkEventRow } from '../../lib/api'
+import { EventFilters } from '../../shared/EventFilters'
 
 function formatTime(ts: string): string {
   try {
@@ -24,11 +25,13 @@ export function NetworkPage() {
   const [events, setEvents] = useState<NetworkEventRow[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState('')
+  const statuses = useMemo(() => [...new Set(events.map((event) => event.status).filter((status): status is string => Boolean(status)))].sort(), [events])
 
   const refetch = useCallback(() => {
     setError(null)
     setLoading(true)
-    fetchNetworkEvents({ time_range: timeRange, agent_id: agentFilter || undefined, limit: 100 })
+    fetchNetworkEvents({ time_range: timeRange, agent_id: agentFilter || undefined, limit: 1000 })
       .then((data) => setEvents(data ?? []))
       .catch((err) => setError(err?.message ?? 'Failed to load'))
       .finally(() => setLoading(false))
@@ -53,11 +56,15 @@ export function NetworkPage() {
         </div>
       ) : error ? (
         <ErrorRetry message={error} onRetry={refetch} />
-      ) : events.length === 0 ? (
-        <EmptyState
-          title="No network events"
-          message="Network connection metadata will appear here once the agent collects data."
-        />
+      ) : (
+        <EventFilters
+          events={events}
+          searchText={(event) => [event.agent_id, event.process_name, event.local_ip_hash, event.local_port, event.remote_ip_hash, event.remote_port, event.status, event.pid].join(' ')}
+          matches={(event) => !statusFilter || event.status === statusFilter}
+          extraControls={<label className="tt-filter"><span className="tt-filter__label">Status</span><select className="tt-select" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All statuses</option>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>}
+        >
+          {(filteredEvents) => filteredEvents.length === 0 ? (
+        <EmptyState title={events.length ? 'No matching network events' : 'No network events'} message={events.length ? 'Adjust the search, date, or status filters.' : 'Network connection metadata will appear here once the agent collects data.'} />
       ) : (
         <div className="tt-table-wrap">
           <table className="tt-table">
@@ -75,7 +82,7 @@ export function NetworkPage() {
               </tr>
             </thead>
             <tbody>
-              {events.map((e) => (
+              {filteredEvents.map((e) => (
                 <tr key={e.id}>
                   <td className="tt-table-cell--mono tt-table-cell--nowrap">{formatTime(e.timestamp)}</td>
                   <td className="tt-table-cell--mono tt-table-cell--muted">{e.agent_id}</td>
@@ -91,6 +98,8 @@ export function NetworkPage() {
             </tbody>
           </table>
         </div>
+      )}
+        </EventFilters>
       )}
     </DomainPageLayout>
   )

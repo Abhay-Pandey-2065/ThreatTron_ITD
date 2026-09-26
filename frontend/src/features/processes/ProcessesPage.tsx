@@ -4,6 +4,7 @@ import { EmptyState } from '../../shared/EmptyState'
 import { ErrorRetry } from '../../shared/ErrorRetry'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchProcessEvents, type ProcessEventRow } from '../../lib/api'
+import { EventFilters } from '../../shared/EventFilters'
 
 function formatTime(ts: string): string {
   try {
@@ -23,7 +24,7 @@ export function ProcessesPage() {
   const refetch = useCallback(() => {
     setError(null)
     setLoading(true)
-    fetchProcessEvents({ time_range: timeRange, agent_id: agentFilter || undefined, limit: 100 })
+    fetchProcessEvents({ time_range: timeRange, agent_id: agentFilter || undefined, limit: 1000 })
       .then((data) => setEvents(data ?? []))
       .catch((err) => setError(err?.message ?? 'Failed to load'))
       .finally(() => setLoading(false))
@@ -41,11 +42,10 @@ export function ProcessesPage() {
         </div>
       ) : error ? (
         <ErrorRetry message={error} onRetry={refetch} />
-      ) : events.length === 0 ? (
-        <EmptyState
-          title="No process events"
-          message="Process events will appear here once the ingest and read APIs are connected. Hook up GET /api/events/processes to populate this table."
-        />
+      ) : (
+        <EventFilters events={events} searchText={(event) => [event.agent_id, event.event_type, event.process_name, event.exe_path, event.parent_name, event.parent_pid].join(' ')}>
+          {(filteredEvents) => filteredEvents.length === 0 ? (
+        <EmptyState title={events.length ? 'No matching process events' : 'No process events'} message={events.length ? 'Adjust the search or date filters.' : 'Process events will appear here once telemetry is available.'} />
       ) : (
         <div className="tt-table-wrap">
           <table className="tt-table">
@@ -59,7 +59,7 @@ export function ProcessesPage() {
               </tr>
             </thead>
             <tbody>
-              {events.map((e) => (
+              {filteredEvents.map((e) => (
                 <tr key={e.id}>
                   <td className="tt-table-cell--mono tt-table-cell--nowrap">{formatTime(e.timestamp)}</td>
                   <td className="tt-table-cell--mono tt-table-cell--muted">{e.agent_id}</td>
@@ -73,6 +73,8 @@ export function ProcessesPage() {
             </tbody>
           </table>
         </div>
+      )}
+        </EventFilters>
       )}
     </DomainPageLayout>
   )

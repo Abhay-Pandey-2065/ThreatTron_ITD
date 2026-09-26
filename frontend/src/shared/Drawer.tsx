@@ -43,7 +43,7 @@ export function Drawer({ open, onClose, title, children }: DrawerProps) {
             onClick={onClose}
             aria-label="Close"
           >
-            ✕
+            Close
           </button>
         </header>
         <div className="tt-drawer__body">{children}</div>

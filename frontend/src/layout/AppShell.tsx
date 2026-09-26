@@ -43,7 +43,7 @@ function AppShellLayout() {
             aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-expanded={!sidebarCollapsed}
           >
-            {sidebarCollapsed ? '☰' : '✕'}
+            {sidebarCollapsed ? 'Menu' : 'Close'}
           </button>
         </div>
         <nav className="tt-shell__sidebar-nav">
@@ -89,7 +89,7 @@ function AppShellLayout() {
                 onClick={() => setSidebarCollapsed(false)}
                 aria-label="Expand sidebar"
               >
-                ☰
+                Menu
               </button>
             )}
             <h2 className="tt-shell__topbar-title">ThreatTron</h2>
@@ -104,7 +104,7 @@ function AppShellLayout() {
                   <option value="1h">Last 1 hour</option>
                   <option value="24h">Last 24 hours</option>
                   <option value="7d">Last 7 days</option>
-                  <option value="custom">Custom (UI only)</option>
+                  <option value="custom">Custom (set dates on page)</option>
                 </select>
               </label>
               <label className="tt-filter">

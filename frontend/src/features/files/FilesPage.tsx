@@ -5,6 +5,7 @@ import { ErrorRetry } from '../../shared/ErrorRetry'
 import { Drawer } from '../../shared/Drawer'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchFileEvents, type FileEventRow } from '../../lib/api'
+import { EventFilters } from '../../shared/EventFilters'
 
 function formatTime(ts: string): string {
   try {
@@ -25,7 +26,7 @@ export function FilesPage() {
   const refetch = useCallback(() => {
     setError(null)
     setLoading(true)
-    fetchFileEvents({ time_range: timeRange, agent_id: agentFilter || undefined, limit: 100 })
+    fetchFileEvents({ time_range: timeRange, agent_id: agentFilter || undefined, limit: 1000 })
       .then((data) => setEvents(data ?? []))
       .catch((err) => setError(err?.message ?? 'Failed to load'))
       .finally(() => setLoading(false))
@@ -46,10 +47,12 @@ export function FilesPage() {
         </div>
       ) : error ? (
         <ErrorRetry message={error} onRetry={refetch} />
-      ) : events.length === 0 ? (
+      ) : (
+        <EventFilters events={events} searchText={(event) => [event.agent_id, event.event_type, event.file_path, event.action].join(' ')}>
+          {(filteredEvents) => filteredEvents.length === 0 ? (
         <EmptyState
-          title="No file events"
-          message="File and move events will appear here once the ingest and read APIs are connected. Hook up GET /api/events/files to populate this table."
+          title={events.length ? 'No matching file events' : 'No file events'}
+          message={events.length ? 'Adjust the search or date filters.' : 'File and move events will appear here once telemetry is available.'}
         />
       ) : (
         <div className="tt-table-wrap">
@@ -64,7 +67,7 @@ export function FilesPage() {
               </tr>
             </thead>
             <tbody>
-              {events.map((e) => (
+              {filteredEvents.map((e) => (
                 <tr
                   key={e.id}
                   className="tt-table-row--clickable"
@@ -82,6 +85,8 @@ export function FilesPage() {
             </tbody>
           </table>
         </div>
+      )}
+        </EventFilters>
       )}
 
       <Drawer open={!!selected} onClose={() => setSelected(null)} title={selected ? `Event #${selected.id}` : ''}>

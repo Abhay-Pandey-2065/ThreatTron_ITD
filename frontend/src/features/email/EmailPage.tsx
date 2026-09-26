@@ -4,6 +4,7 @@ import { EmptyState } from '../../shared/EmptyState'
 import { ErrorRetry } from '../../shared/ErrorRetry'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchEmailEvents, type EmailEventRow } from '../../lib/api'
+import { EventFilters } from '../../shared/EventFilters'
 
 function formatTime(ts: string): string {
   try {
@@ -23,7 +24,7 @@ export function EmailPage() {
   const refetch = useCallback(() => {
     setError(null)
     setLoading(true)
-    fetchEmailEvents({ time_range: timeRange, agent_id: agentFilter || undefined, limit: 100 })
+    fetchEmailEvents({ time_range: timeRange, agent_id: agentFilter || undefined, limit: 1000 })
       .then((data) => setEvents(data ?? []))
       .catch((err) => setError(err?.message ?? 'Failed to load'))
       .finally(() => setLoading(false))
@@ -45,11 +46,10 @@ export function EmailPage() {
         </div>
       ) : error ? (
         <ErrorRetry message={error} onRetry={refetch} />
-      ) : events.length === 0 ? (
-        <EmptyState
-          title="No email events"
-          message="Email metadata will appear here once the ingest and read APIs are connected. Hook up GET /api/events/emails to populate this table."
-        />
+      ) : (
+        <EventFilters events={events} searchText={(event) => [event.agent_id, event.sender, event.subject, event.body, event.classified].join(' ')}>
+          {(filteredEvents) => filteredEvents.length === 0 ? (
+        <EmptyState title={events.length ? 'No matching email events' : 'No email events'} message={events.length ? 'Adjust the search or date filters.' : 'Email metadata will appear here once telemetry is available.'} />
       ) : (
         <div className="tt-table-wrap">
           <table className="tt-table">
@@ -66,9 +66,8 @@ export function EmailPage() {
               </tr>
             </thead>
             <tbody>
-              {events.map((e) => (
+              {filteredEvents.map((e) => (
                 <tr key={e.id}>
-                  <td> className="tt-table-cell--mono"{e.id}</td>
                   <td className="tt-table-cell--mono tt-table-cell--nowrap">{formatTime(e.timestamp)}</td>
                   <td className="tt-table-cell--mono tt-table-cell--muted">{e.agent_id}</td>
                   <td style={{ maxWidth: '12rem', overflow: 'hidden', textOverflow: 'ellipsis' }} title={e.sender ?? ''}>
@@ -94,6 +93,8 @@ export function EmailPage() {
             </tbody>
           </table>
         </div>
+      )}
+        </EventFilters>
       )}
     </DomainPageLayout>
   )

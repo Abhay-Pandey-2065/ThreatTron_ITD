@@ -5,23 +5,23 @@ interface MLLiveRiskGaugeProps {
   agentId?: string;
 }
 
-const RULE_LABELS: Record<string, { label: string; color: string; icon: string }> = {
-  USB_FILE_EXFIL:         { label: 'USB + File Exfiltration',         color: '#ef4444', icon: '💾' },
-  SUSPICIOUS_WEB_STAGING: { label: 'Suspicious Web + File Staging',   color: '#f59e0b', icon: '🌐' },
-  EMAIL_EXFILTRATION:     { label: 'Email Data Leakage',              color: '#f59e0b', icon: '📧' },
-  FULL_KILL_CHAIN:        { label: 'Full Kill Chain Detected',        color: '#ef4444', icon: '🚨' },
-  SUSPICIOUS_FILE_TYPES:  { label: 'Suspicious File Types (.exe/.zip)', color: '#a78bfa', icon: '📁' },
-  AFTER_HOURS_EXFIL:      { label: 'After-Hours Data Exfiltration',  color: '#f59e0b', icon: '🕛' },
-  MASS_RECIPIENT_SPRAY:   { label: 'Mass Email Spray Detected',      color: '#ef4444', icon: '📤' },
+const RULE_LABELS: Record<string, { label: string; color: string }> = {
+  USB_FILE_EXFIL:         { label: 'USB + File Exfiltration',         color: '#ef4444' },
+  SUSPICIOUS_WEB_STAGING: { label: 'Suspicious Web + File Staging',   color: '#f59e0b' },
+  EMAIL_EXFILTRATION:     { label: 'Email Data Leakage',              color: '#f59e0b' },
+  FULL_KILL_CHAIN:        { label: 'Full Kill Chain Detected',        color: '#ef4444' },
+  SUSPICIOUS_FILE_TYPES:  { label: 'Suspicious File Types (.exe/.zip)', color: '#a78bfa' },
+  AFTER_HOURS_EXFIL:      { label: 'After-Hours Data Exfiltration',  color: '#f59e0b' },
+  MASS_RECIPIENT_SPRAY:   { label: 'Mass Email Spray Detected',      color: '#ef4444' },
 };
 
 
 
 const MODELS = [
-  { key: 'lightgbm_confidence', label: '🌲 LightGBM',          color: '#6366f1' },
-  { key: 'rf_confidence',       label: '🌳 Random Forest',      color: '#10b981' },
-  { key: 'lr_confidence',       label: '📈 Logistic Regression', color: '#3b82f6' },
-  { key: 'anomaly_confidence',  label: '🔍 Isolation Forest',   color: '#f59e0b',
+  { key: 'lightgbm_confidence', label: 'LightGBM',          color: '#6366f1' },
+  { key: 'rf_confidence',       label: 'Random Forest',      color: '#10b981' },
+  { key: 'lr_confidence',       label: 'Logistic Regression', color: '#3b82f6' },
+  { key: 'anomaly_confidence',  label: 'Isolation Forest',   color: '#f59e0b',
     tooltip: 'Flags statistical anomalies — high score means behaviour deviates strongly from baseline even if no named rule fired.' },
 ];
 
@@ -167,7 +167,7 @@ export function MLLiveRiskGauge({ agentId = 'Global' }: MLLiveRiskGaugeProps) {
         </div>
 
         <div style={{ fontSize: 11, color: '#444', display: 'flex', gap: 10 }}>
-          {offline ? '⚡ Backend Offline' : (
+          {offline ? 'Backend Offline' : (
             <>
               <span style={{ color: '#555' }}>Live Stream Active</span>
               {lastUpdate && (
@@ -249,8 +249,8 @@ export function MLLiveRiskGauge({ agentId = 'Global' }: MLLiveRiskGaugeProps) {
               display: 'flex', alignItems: 'center', gap: 8,
             }}>
               {lastAlertFormatted
-                ? <><span>⏱</span> Last alert at <strong>{lastAlertFormatted}</strong> this session</>
-                : <><span>✅</span> No alerts triggered in this session</>
+                ? <>Last alert at <strong>{lastAlertFormatted}</strong> this session</>
+                : <>No alerts triggered in this session</>
               }
             </div>
           </div>
@@ -259,17 +259,16 @@ export function MLLiveRiskGauge({ agentId = 'Global' }: MLLiveRiskGaugeProps) {
           {riskData?.rules_triggered && riskData.rules_triggered.length > 0 && (
             <div style={{ marginBottom: 14 }}>
               <div style={{ fontSize: 11, color: '#444', marginBottom: 8, letterSpacing: '0.8px', textTransform: 'uppercase' }}>
-                🚨 Attack Patterns Detected
+                Attack Patterns Detected
               </div>
               {riskData.rules_triggered.map(rule => {
-                const meta = RULE_LABELS[rule] || { label: rule, color: '#888', icon: '⚠️' };
+                const meta = RULE_LABELS[rule] || { label: rule, color: '#888' };
                 return (
                   <div key={rule} style={{
                     display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px',
                     marginBottom: 4, borderRadius: 6,
                     background: meta.color + '12', border: `1px solid ${meta.color}33`,
                   }}>
-                    <span>{meta.icon}</span>
                     <span style={{ fontSize: 12, color: meta.color, fontWeight: 600 }}>{meta.label}</span>
                   </div>
                 );
