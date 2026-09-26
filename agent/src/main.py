@@ -21,14 +21,6 @@ def event_callback(event):
 
 def run_agent(stop_event=None):
     stop_event = stop_event or threading.Event()
-    session_event = base_event("session_started")
-    session_event["hostname"] = HOSTNAME
-    session_event["metadata"] = agent_session.to_dict()
-    try:
-        send_events([session_event])
-    except Exception:
-        pass
-    
     file_monitor = FileMonitor(MONITORED_DIRECTORIES, event_callback, worker_count=THREAD_POOL_SIZE)
     usb_monitor = USBMonitor(event_callback, stop_event=stop_event)
     process_monitor = ProcessMonitor(event_callback, interval=10, stop_event=stop_event)
@@ -38,6 +30,11 @@ def run_agent(stop_event=None):
     try:
         for monitor in monitors:
             monitor.start()
+
+        session_event = base_event("session_started")
+        session_event["hostname"] = HOSTNAME
+        session_event["metadata"] = agent_session.to_dict()
+        send_events([session_event])
 
         while not stop_event.is_set():
             events = []

@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import threading
+import traceback
 from pathlib import Path
 
 
@@ -26,8 +27,6 @@ import servicemanager
 import win32service
 import win32serviceutil
 
-from main import run_agent
-
 
 class ThreatTronAgentService(win32serviceutil.ServiceFramework):
     _svc_name_ = "ThreatTronAgent"
@@ -43,11 +42,15 @@ class ThreatTronAgentService(win32serviceutil.ServiceFramework):
         self.stop_event.set()
 
     def SvcDoRun(self):
+        self.ReportServiceStatus(win32service.SERVICE_RUNNING)
         servicemanager.LogInfoMsg("ThreatTron data collection service started.")
         try:
+            from main import run_agent
+
             run_agent(self.stop_event)
         except Exception as exc:
-            servicemanager.LogErrorMsg(f"ThreatTron data collection service failed: {exc}")
+            error_details = "".join(traceback.format_exception(type(exc), exc, exc.__traceback__))
+            servicemanager.LogErrorMsg(f"ThreatTron data collection service failed:\n{error_details}")
             raise
         servicemanager.LogInfoMsg("ThreatTron data collection service stopped.")
 

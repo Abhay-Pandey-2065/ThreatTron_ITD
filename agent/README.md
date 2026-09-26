@@ -64,6 +64,7 @@ The service collects file activity in the folders you selected, process starts/s
 
 - **Python 3.12 was not found:** install 64-bit Python 3.12, enable **Add python.exe to PATH**, then reopen an Administrator PowerShell window and retry.
 - **Service did not start:** open Services, select **ThreatTron Data Collection Agent**, and check its properties. Also open **Event Viewer → Windows Logs → Application** and look for service errors.
+- **Error 1053 / service start timed out:** use the latest agent ZIP. Older releases may not report the Windows service as running before initializing the collectors and contacting the backend. In Services, the display name is **ThreatTron Data Collection Agent**; its internal name is `ThreatTronAgent`.
 - **No records appear:** verify the backend HTTPS address with the administrator and ensure this computer has internet access. A free hosting service may take time to wake.
 - **Folder skipped:** check that the path exists and that the service account can access it.
 - **Change folders or backend:** stop the service, edit `config\monitor_config.json` or `config\service_settings.json`, then start it again.
