@@ -3,6 +3,12 @@ name: Package Windows agent release
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Existing GitHub release tag (for example, v1.0.0)
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -17,8 +23,18 @@ jobs:
         shell: pwsh
         run: ./agent/package_agent.ps1 -OutputPath "$env:RUNNER_TEMP/ThreatTronAgent.zip"
 
+      - name: Select release tag
+        id: release
+        shell: pwsh
+        run: |
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "tag=${{ inputs.release_tag }}" >> $env:GITHUB_OUTPUT
+          } else {
+            "tag=$env:GITHUB_REF_NAME" >> $env:GITHUB_OUTPUT
+          }
+
       - name: Attach agent ZIP to GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         shell: pwsh
-        run: gh release upload "$env:GITHUB_REF_NAME" "$env:RUNNER_TEMP/ThreatTronAgent.zip" --clobber
+        run: gh release upload "${{ steps.release.outputs.tag }}" "$env:RUNNER_TEMP/ThreatTronAgent.zip" --clobber

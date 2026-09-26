@@ -14,7 +14,7 @@ Only install it on a computer you own or are authorized to monitor. The installe
 4. Continue with **Install the agent** below.
 
 The release ZIP contains only the files needed by the agent. It does not include Gmail/email code, credentials, local tokens, or developer cache files.
-If the Releases page has no `ThreatTronAgent.zip` yet, a project maintainer must publish a GitHub Release; the repository's release workflow attaches the ZIP automatically.
+If the Releases page has no `ThreatTronAgent.zip` yet, a project maintainer can publish a new release or run **Actions → Package Windows agent release → Run workflow**, entering the existing release tag. GitHub then builds and attaches the ZIP to that release.
 
 ### Download directly from the repository
 
