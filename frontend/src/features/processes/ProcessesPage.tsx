@@ -5,15 +5,7 @@ import { ErrorRetry } from '../../shared/ErrorRetry'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchProcessEvents, type ProcessEventRow } from '../../lib/api'
 import { EventFilters } from '../../shared/EventFilters'
-
-function formatTime(ts: string): string {
-  try {
-    const d = new Date(ts)
-    return isNaN(d.getTime()) ? ts : d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
-  } catch {
-    return ts
-  }
-}
+import { formatAbsoluteUtc, formatRelative } from '../../shared/format'
 
 export function ProcessesPage() {
   const { timeRange, agentFilter } = useShellFilters()
@@ -61,10 +53,12 @@ export function ProcessesPage() {
             <tbody>
               {filteredEvents.map((e) => (
                 <tr key={e.id}>
-                  <td className="tt-table-cell--mono tt-table-cell--nowrap">{formatTime(e.timestamp)}</td>
+                  <td className="tt-mono tt-table-cell--nowrap" title={formatAbsoluteUtc(e.timestamp)}>
+                    {formatRelative(e.timestamp)}
+                  </td>
                   <td className="tt-table-cell--mono tt-table-cell--muted">{e.agent_id}</td>
                   <td>{e.event_type}</td>
-                  <td>{e.process_name ?? '—'}</td>
+                  <td className="tt-mono">{e.process_name ?? '—'}</td>
                   <td className="tt-table-cell--mono" style={{ maxWidth: '18rem', overflow: 'hidden', textOverflow: 'ellipsis' }} title={e.exe_path ?? ''}>
                     {e.exe_path ?? '—'}
                   </td>

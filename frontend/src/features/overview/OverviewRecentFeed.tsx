@@ -3,15 +3,7 @@ import { Link } from 'react-router-dom'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchRecentEvents, type RecentEvent } from '../../lib/api'
 import { ErrorRetry } from '../../shared/ErrorRetry'
-
-function formatTime(ts: string): string {
-  try {
-    const d = new Date(ts)
-    return isNaN(d.getTime()) ? ts : d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
-  } catch {
-    return ts
-  }
-}
+import { formatAbsoluteUtc, formatRelative } from '../../shared/format'
 
 export function OverviewRecentFeed() {
   const { timeRange, agentFilter } = useShellFilters()
@@ -54,7 +46,9 @@ export function OverviewRecentFeed() {
           {events.map((e) => (
             <li key={`${e.type}-${e.id}`} className="tt-feed-item">
               <span className="tt-feed-item__type">{e.type}</span>
-              <span className="tt-feed-item__time">{formatTime(e.timestamp)}</span>
+              <span className="tt-feed-item__time" title={formatAbsoluteUtc(e.timestamp)}>
+                {formatRelative(e.timestamp)}
+              </span>
               <span className="tt-feed-item__agent">{e.agent_id}</span>
               {e.ml_flagged ? (
                 <Link className="tt-feed-item__badge tt-feed-item__badge--ml" to="/ml">
