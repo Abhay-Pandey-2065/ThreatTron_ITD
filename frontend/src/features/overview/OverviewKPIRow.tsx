@@ -61,12 +61,12 @@ export function OverviewKPIRow() {
         </span>
       </div>
       <div className="tt-kpi-card">
-        <span className="tt-kpi-card__label">Agents</span>
+        <span className="tt-kpi-card__label">Known agents</span>
         <span className="tt-kpi-card__value">
           {loading ? '…' : agents != null ? String(agents) : agentFilter ? '1' : 'All'}
         </span>
         <span className="tt-kpi-card__hint">
-          {loading ? 'Loading…' : agents != null ? 'Active' : 'Filter in header'}
+          {loading ? 'Loading…' : agents != null ? 'Ever registered' : 'Filter in header'}
         </span>
       </div>
     </section>
