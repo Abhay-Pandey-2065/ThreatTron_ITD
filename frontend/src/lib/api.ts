@@ -388,9 +388,30 @@ export interface SandboxInvestigation {
   timeline: WorkflowAuditRecord[]
 }
 
-export async function fetchSecurityAlerts(): Promise<SecurityAlert[]> {
-  const data = await fetchJson<{ alerts?: SecurityAlert[] }>('/api/security/alerts')
+export async function fetchSecurityAlerts(
+  params: { status?: AlertStatus; agent_id?: string; limit?: number } = {},
+): Promise<SecurityAlert[]> {
+  const query = new URLSearchParams()
+  if (params.status) query.set('status', params.status)
+  if (params.agent_id) query.set('agent_id', params.agent_id)
+  if (params.limit) query.set('limit', String(params.limit))
+  const qs = query.toString()
+  const data = await fetchJson<{ alerts?: SecurityAlert[] }>(`/api/security/alerts${qs ? `?${qs}` : ''}`)
   return data.alerts ?? []
+}
+
+export interface SecurityOverview {
+  alerts: number
+  open_alerts: number
+  investigations: number
+  risk_assessments: number
+  by_severity: Record<string, number>
+  /** Active (open / acknowledged / investigating) alerts only; absent on older backends. */
+  open_by_severity?: Record<string, number>
+}
+
+export async function fetchSecurityOverview(): Promise<SecurityOverview> {
+  return await fetchJson<SecurityOverview>('/api/security/overview')
 }
 
 export async function updateSecurityAlertStatus(alertId: number, status: AlertStatus): Promise<SecurityAlert> {

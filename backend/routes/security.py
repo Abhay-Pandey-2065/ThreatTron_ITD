@@ -755,6 +755,13 @@ def overview(db: Session = Depends(get_db)):
             severity: db.query(func.count(Alert.id)).filter(Alert.severity == severity).scalar() or 0
             for severity in ("critical", "high", "medium", "low")
         },
+        "open_by_severity": {
+            severity: db.query(func.count(Alert.id)).filter(
+                Alert.severity == severity,
+                Alert.status.in_(ACTIVE_ALERT_STATUSES),
+            ).scalar() or 0
+            for severity in ("critical", "high", "medium", "low")
+        },
     }
 
 

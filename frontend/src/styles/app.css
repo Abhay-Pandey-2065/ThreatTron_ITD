@@ -1678,3 +1678,65 @@ button.tt-link--button:hover {
 .tt-agents-table .tt-table td {
   padding: 0.3rem 0.5rem;
 }
+
+/* Overview: triage row */
+.tt-kpi-card--critical {
+  border-top-color: var(--severity-critical);
+}
+
+.tt-kpi-card--critical .tt-kpi-card__value {
+  color: var(--severity-critical);
+}
+
+.tt-kpi-card--warn {
+  border-top-color: var(--severity-warn);
+}
+
+.tt-triage__empty {
+  margin: 0.75rem 0 0;
+}
+
+.tt-triage-list {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tt-triage-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) minmax(0, 10rem) 2.5rem 5rem auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.875rem;
+}
+
+.tt-triage-item__title,
+.tt-triage-item__agent {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tt-triage-item__agent,
+.tt-triage-item__time {
+  color: var(--text-muted);
+}
+
+.tt-triage-item__risk {
+  text-align: right;
+  color: var(--text-h);
+}
+
+@media (max-width: 40rem) {
+  .tt-triage-item {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  .tt-triage-item__agent,
+  .tt-triage-item__risk,
+  .tt-triage-item__time {
+    display: none;
+  }
+}

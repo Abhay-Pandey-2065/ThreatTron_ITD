@@ -1,6 +1,7 @@
 import { OverviewActivityPanel } from '../features/overview/OverviewActivityPanel'
 import { OverviewKPIRow } from '../features/overview/OverviewKPIRow'
 import { OverviewRecentFeed } from '../features/overview/OverviewRecentFeed'
+import { OverviewTriage } from '../features/overview/OverviewTriage'
 import { useShellFilters } from '../layout/useShellFilters'
 
 export function OverviewHomePage() {
@@ -27,6 +28,7 @@ export function OverviewHomePage() {
         </p>
       </header>
 
+      <OverviewTriage />
       <OverviewKPIRow />
       <OverviewActivityPanel />
       <OverviewRecentFeed />
