@@ -1,4 +1,5 @@
 import { useMemo, useState, type ReactNode } from 'react'
+import { parseTimestamp } from './format'
 
 interface TimestampedEvent {
   timestamp: string
@@ -30,14 +31,14 @@ export function EventFilters<T extends TimestampedEvent>({
     const to = toDate ? new Date(toDate).getTime() : null
     return events
       .filter((event) => {
-        const timestamp = new Date(event.timestamp).getTime()
+        const timestamp = parseTimestamp(event.timestamp).getTime()
         return (!query || searchText(event).toLocaleLowerCase().includes(query))
           && (from == null || timestamp >= from)
           && (to == null || timestamp <= to)
           && (!matches || matches(event))
       })
       .sort((a, b) => {
-        const delta = new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        const delta = parseTimestamp(a.timestamp).getTime() - parseTimestamp(b.timestamp).getTime()
         return sortOrder === 'newest' ? -delta : delta
       })
   }, [events, search, fromDate, toDate, sortOrder, searchText, matches])

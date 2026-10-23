@@ -14,6 +14,7 @@ import {
   type USBEventRow,
 } from '../lib/api'
 import { ErrorRetry } from '../shared/ErrorRetry'
+import { parseTimestamp } from '../shared/format'
 
 // Each row also carries the session it was grouped into on this page.
 type WithLocalSession<T> = T & { __local_session_id?: string }
@@ -33,7 +34,7 @@ const SESSION_GAP_MS = 30 * 60 * 1000
 
 function formatTime(ts: string): string {
   try {
-    const d = new Date(ts)
+    const d = parseTimestamp(ts)
     return isNaN(d.getTime()) ? ts : d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
   } catch {
     return ts
@@ -89,7 +90,7 @@ export function AdminHomePage() {
         arr.forEach((e) => {
           let t = 0
           if (e.timestamp) {
-            const d = new Date(e.timestamp)
+            const d = parseTimestamp(e.timestamp)
             if (!isNaN(d.getTime())) t = d.getTime()
           }
           allEvents.push({ _domain: domain, _obj: e, time: t })

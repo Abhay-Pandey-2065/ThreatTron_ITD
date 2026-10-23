@@ -5,10 +5,11 @@ import { ErrorRetry } from '../../shared/ErrorRetry'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchSystemEvents, type SystemEventRow } from '../../lib/api'
 import { EventFilters } from '../../shared/EventFilters'
+import { parseTimestamp } from '../../shared/format'
 
 function formatTime(ts: string): string {
   try {
-    const d = new Date(ts)
+    const d = parseTimestamp(ts)
     return isNaN(d.getTime()) ? ts : d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
   } catch {
     return ts

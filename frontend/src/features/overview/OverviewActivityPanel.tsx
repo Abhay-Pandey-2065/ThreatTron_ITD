@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchRecentEvents, type RecentEvent } from '../../lib/api'
 import { formatAbsoluteUtc, formatRelative } from '../../shared/format'
+import { parseTimestamp } from '../../shared/format'
 
 /** Number of recent events sampled for the sparkline and agent table. */
 const SAMPLE_LIMIT = 200
@@ -28,7 +29,7 @@ function presetWindow(timeRange: string): VolumeWindow | null {
 }
 
 function buildVolume(events: RecentEvent[], timeRange: string, now: number) {
-  const times = events.map((e) => new Date(e.timestamp).getTime()).filter((t) => !isNaN(t))
+  const times = events.map((e) => parseTimestamp(e.timestamp).getTime()).filter((t) => !isNaN(t))
   const preset = presetWindow(timeRange)
 
   if (preset) {
@@ -69,7 +70,7 @@ interface AgentSummary {
 function summarizeAgents(events: RecentEvent[]): AgentSummary[] {
   const byAgent = new Map<string, AgentSummary>()
   for (const e of events) {
-    const ms = new Date(e.timestamp).getTime()
+    const ms = parseTimestamp(e.timestamp).getTime()
     const existing = byAgent.get(e.agent_id)
     if (existing) {
       existing.count++

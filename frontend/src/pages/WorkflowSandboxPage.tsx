@@ -19,6 +19,7 @@ import {
 import { EmptyState } from '../shared/EmptyState'
 import { ErrorRetry } from '../shared/ErrorRetry'
 import { severityTone } from '../shared/severity'
+import { parseTimestamp } from '../shared/format'
 
 /** Signals the simulator can switch on. Any selected signal raises an alert. */
 const SIGNALS = [
@@ -64,7 +65,7 @@ function capitalize(value: string): string {
 }
 
 function formatWhen(value: string): string {
-  const date = new Date(value)
+  const date = parseTimestamp(value)
   return isNaN(date.getTime()) ? value : date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 }
 

@@ -1,4 +1,5 @@
 import type { MlInsight } from '../../lib/api'
+import { parseTimestamp } from '../../shared/format'
 
 interface MlInsightTableProps {
   insights: MlInsight[]
@@ -7,7 +8,7 @@ interface MlInsightTableProps {
 
 function formatTime(ts: string): string {
   try {
-    const d = new Date(ts)
+    const d = parseTimestamp(ts)
     return isNaN(d.getTime()) ? ts : d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
   } catch {
     return ts

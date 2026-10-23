@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { Drawer } from '../../shared/Drawer'
 import type { MlInsight } from '../../lib/api'
 import { useShellFilters } from '../../layout/useShellFilters'
+import { parseTimestamp } from '../../shared/format'
 
 interface MlInsightDrawerProps {
   insight: MlInsight | null
@@ -11,7 +12,7 @@ interface MlInsightDrawerProps {
 
 function formatTime(ts: string): string {
   try {
-    const d = new Date(ts)
+    const d = parseTimestamp(ts)
     return isNaN(d.getTime()) ? ts : d.toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })
   } catch {
     return ts
