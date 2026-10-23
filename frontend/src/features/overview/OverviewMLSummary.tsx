@@ -22,7 +22,7 @@ export function OverviewMLSummary() {
             Model insights
           </h2>
           <Link className="tt-link tt-dash__section-link" to={buildPath('/ml')}>
-            View all →
+            View all
           </Link>
         </div>
         <p className="tt-dash__muted">Loading…</p>
@@ -32,7 +32,7 @@ export function OverviewMLSummary() {
             <span className="tt-ml-strip__value">…</span>
           </div>
           <div className="tt-ml-strip__item">
-            <span className="tt-ml-strip__label">High severity (24h)</span>
+            <span className="tt-ml-strip__label">High severity, 24 hours</span>
             <span className="tt-ml-strip__value">…</span>
           </div>
           <div className="tt-ml-strip__item">
@@ -53,7 +53,7 @@ export function OverviewMLSummary() {
             Model insights
           </h2>
           <Link className="tt-link tt-dash__section-link" to={buildPath('/ml')}>
-            View all →
+            View all
           </Link>
         </div>
         <ErrorRetry message={err.message} onRetry={refetch} />
@@ -74,28 +74,27 @@ export function OverviewMLSummary() {
           Model insights
         </h2>
         <Link className="tt-link tt-dash__section-link" to={buildPath('/ml')}>
-          View all →
+          View all
         </Link>
       </div>
       {!configured && (
         <p className="tt-dash__muted">
-          Model not configured — connect an ML API to show anomaly counts, risk scores, and last run
-          time here.
+          The model has not reported a run yet. Results appear here after the first run.
         </p>
       )}
       <div className="tt-ml-strip" role="group" aria-label="ML summary metrics">
         <div className="tt-ml-strip__item">
           <span className="tt-ml-strip__label">Open alerts</span>
           <span className="tt-ml-strip__value">
-            {openAlerts != null ? String(openAlerts) : 'N/A'}
+            {openAlerts != null ? String(openAlerts) : '—'}
           </span>
         </div>
         <div className="tt-ml-strip__item">
-          <span className="tt-ml-strip__label">High severity (24h)</span>
+          <span className="tt-ml-strip__label">High severity, 24 hours</span>
           <span
             className={`tt-ml-strip__value ${highSev != null && highSev > 0 ? 'tt-ml-strip__value--critical' : ''}`}
           >
-            {highSev != null ? String(highSev) : 'N/A'}
+            {highSev != null ? String(highSev) : '—'}
           </span>
         </div>
         <div className="tt-ml-strip__item">

@@ -18,7 +18,6 @@ export function UserMenu() {
 
   if (!user) return null
 
-  const sessionPath = user.role === 'admin' ? '/admin/sign-in' : '/user'
 
   return (
     <div className="tt-user-menu" ref={ref}>
@@ -33,9 +32,6 @@ export function UserMenu() {
         }}
       >
         <span className="tt-user-menu__trigger-text">{user.email}</span>
-        <span className="tt-user-menu__chevron" aria-hidden>
-          ▾
-        </span>
       </button>
       {open ? (
         <div className="tt-user-menu__dropdown" role="menu">
@@ -44,14 +40,16 @@ export function UserMenu() {
               {user.role === 'admin' ? 'Administrator' : 'User'}
             </span>
           </div>
-          <NavLink
-            className="tt-user-menu__item"
-            to={sessionPath}
-            role="menuitem"
-            onClick={() => setOpen(false)}
-          >
-            Session & account
-          </NavLink>
+          {user.role === 'admin' ? (
+            <NavLink
+              className="tt-user-menu__item"
+              to="/admin/sign-in"
+              role="menuitem"
+              onClick={() => setOpen(false)}
+            >
+              Account
+            </NavLink>
+          ) : null}
           <NavLink
             className="tt-user-menu__item"
             to={`/forgot-password?portal=${user.role === 'admin' ? 'admin' : 'user'}`}

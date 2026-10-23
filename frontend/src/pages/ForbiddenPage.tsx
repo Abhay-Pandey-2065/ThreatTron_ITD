@@ -9,7 +9,7 @@ export function ForbiddenPage() {
       <div className="tt-static__card">
         <h1 className="tt-static__title">Access denied</h1>
         <p className="tt-static__text">
-          This area is restricted to administrators. If you need access, contact an admin.
+          This area is for administrators only. Contact an administrator if you need access.
         </p>
         <p className="tt-static__actions">
           {user ? (
@@ -17,7 +17,7 @@ export function ForbiddenPage() {
               Back to overview
             </Link>
           ) : (
-            <Link className="tt-link" to="/user">
+            <Link className="tt-link" to="/admin/sign-in">
               Sign in
             </Link>
           )}

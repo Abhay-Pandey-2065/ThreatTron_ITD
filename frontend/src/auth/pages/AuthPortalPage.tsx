@@ -16,13 +16,13 @@ const portalCopy: Record<
 > = {
   user: {
     title: 'ThreatTron',
-    subtitle: 'User console — sign in to access your account.',
+    subtitle: 'Sign in to access your account.',
     signInHeading: 'User sign in',
     signUpHeading: 'User sign up',
   },
   admin: {
     title: 'ThreatTron',
-    subtitle: 'Administrator console — sign in or register an admin account.',
+    subtitle: 'Sign in or create an administrator account.',
     signInHeading: 'Administrator sign in',
     signUpHeading: 'Administrator sign up',
   },
@@ -37,7 +37,7 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
   if (from === '/' || from === '/user' || from === '/admin/sign-in') from = '/overview'
 
   const copy = portalCopy[portal]
-  const otherPortalHref = portal === 'user' ? '/admin/sign-in' : '/user'
+  const otherPortalHref = '/overview'
   // const otherPortalLabel = portal === 'user' ? 'Administrator portal' : 'User portal'
 
   const [mode, setMode] = useState<AuthMode>('signin')
@@ -138,7 +138,7 @@ export function AuthPortalPage({ portal }: { portal: AuthPortal }) {
       <div className="tt-login__card">
         <p className="tt-login__breadcrumb">
           <Link className="tt-link" to="/">
-            ← Home
+            Back to home
           </Link>
         </p>
         <h1 className="tt-login__title">{copy.title}</h1>

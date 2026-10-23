@@ -37,7 +37,7 @@ export function ProcessesPage() {
       ) : (
         <EventFilters events={events} searchText={(event) => [event.agent_id, event.event_type, event.process_name, event.exe_path, event.parent_name, event.parent_pid].join(' ')}>
           {(filteredEvents) => filteredEvents.length === 0 ? (
-        <EmptyState title={events.length ? 'No matching process events' : 'No process events'} message={events.length ? 'Adjust the search or date filters.' : 'Process events will appear here once telemetry is available.'} />
+        <EmptyState title={events.length ? 'No matching process events' : 'No process events'} message={events.length ? 'Adjust the search or date filters.' : 'No process events in this range.'} />
       ) : (
         <div className="tt-table-wrap">
           <table className="tt-table">

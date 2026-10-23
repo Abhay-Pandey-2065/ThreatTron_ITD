@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useShellFilters } from '../../layout/useShellFilters'
 import { fetchOverviewStats, type OverviewStats } from '../../lib/api'
 import { ErrorRetry } from '../../shared/ErrorRetry'
+import { rangeLabel } from '../../shared/format'
 
 export function OverviewKPIRow() {
   const { timeRange, agentFilter } = useShellFilters()
@@ -43,12 +44,12 @@ export function OverviewKPIRow() {
   return (
     <section className="tt-kpi-row" aria-label="Key metrics">
       <div className="tt-kpi-card">
-        <span className="tt-kpi-card__label">Events ({timeRange})</span>
+        <span className="tt-kpi-card__label">Events, {rangeLabel(timeRange)}</span>
         <span className="tt-kpi-card__value">
           {loading ? '…' : total != null ? String(total) : '—'}
         </span>
         <span className="tt-kpi-card__hint">
-          {loading ? 'Loading…' : total == null ? 'Telemetry API pending' : 'In range'}
+          {loading ? 'Loading…' : total == null ? 'No data yet' : 'In selected range'}
         </span>
       </div>
       <div className="tt-kpi-card">
@@ -57,16 +58,16 @@ export function OverviewKPIRow() {
           {loading ? '…' : typeSummary ?? '—'}
         </span>
         <span className="tt-kpi-card__hint">
-          {loading ? 'Loading…' : typeSummary ? 'Breakdown' : 'File / process / system…'}
+          {loading ? 'Loading…' : typeSummary ? 'Count per event type' : 'No events in this range'}
         </span>
       </div>
       <div className="tt-kpi-card">
-        <span className="tt-kpi-card__label">Known agents</span>
+        <span className="tt-kpi-card__label">Agents</span>
         <span className="tt-kpi-card__value">
-          {loading ? '…' : agents != null ? String(agents) : agentFilter ? '1' : 'All'}
+          {loading ? '…' : agents != null ? String(agents) : agentFilter ? '1' : '—'}
         </span>
         <span className="tt-kpi-card__hint">
-          {loading ? 'Loading…' : agents != null ? 'Ever registered' : 'Filter in header'}
+          {loading ? 'Loading…' : agents != null ? 'Registered agents' : 'Use the agent filter to narrow'}
         </span>
       </div>
     </section>

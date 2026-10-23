@@ -52,7 +52,7 @@ export function OverviewTriage() {
           Needs attention
         </h2>
         <Link className="tt-link tt-dash__section-link" to={buildPath('/alerts')}>
-          Open alert queue →
+          Open alert queue
         </Link>
       </div>
 
@@ -69,25 +69,25 @@ export function OverviewTriage() {
             <div className={`tt-kpi-card ${critical ? 'tt-kpi-card--critical' : ''}`}>
               <span className="tt-kpi-card__label">Critical</span>
               <span className="tt-kpi-card__value">{show(critical)}</span>
-              <span className="tt-kpi-card__hint">Risk ≥ 90</span>
+              <span className="tt-kpi-card__hint">Risk 90 and above</span>
             </div>
             <div className={`tt-kpi-card ${high ? 'tt-kpi-card--warn' : ''}`}>
               <span className="tt-kpi-card__label">High</span>
               <span className="tt-kpi-card__value">{show(high)}</span>
-              <span className="tt-kpi-card__hint">Risk 70–89</span>
+              <span className="tt-kpi-card__hint">Risk 70 to 89</span>
             </div>
             <div className="tt-kpi-card">
               <span className="tt-kpi-card__label">Open investigations</span>
               <span className="tt-kpi-card__value">{show(overview?.investigations)}</span>
               <Link className="tt-link tt-kpi-card__hint" to={buildPath('/investigations')}>
-                View cases
+                View investigations
               </Link>
             </div>
           </div>
 
           {loading ? null : alerts.length === 0 ? (
             <p className="tt-dash__muted tt-triage__empty">
-              {agentFilter ? `No new alerts for ${agentFilter}.` : 'No new alerts awaiting triage.'}
+              {agentFilter ? `No open alerts for ${agentFilter}.` : 'No open alerts right now.'}
             </p>
           ) : (
             <ul className="tt-triage-list">
@@ -111,7 +111,7 @@ export function OverviewTriage() {
                       {formatRelative(alert.last_seen_at)}
                     </span>
                     <Link className="tt-link" to={buildPath('/alerts')}>
-                      Triage
+                      Review
                     </Link>
                   </li>
                 )

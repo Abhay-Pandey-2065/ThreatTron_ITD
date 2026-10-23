@@ -68,17 +68,9 @@ export function SystemPage() {
           </>}
         >
           {(filteredEvents) => filteredEvents.length === 0 ? (
-        <EmptyState title={events.length ? 'No matching system events' : 'No system events'} message={events.length ? 'Adjust the search, date, CPU, or memory filters.' : 'CPU and memory metrics will appear here once telemetry is available.'} />
+        <EmptyState title={events.length ? 'No matching system events' : 'No system events'} message={events.length ? 'Adjust the search, date, CPU, or memory filters.' : 'No CPU or memory metrics in this range.'} />
       ) : (
         <>
-          <section className="tt-dash__section" style={{ marginBottom: '1rem' }}>
-            <h2 className="tt-dash__h2">CPU / Memory over time</h2>
-            <div className="tt-chart-placeholder">
-              <p className="tt-dash__muted">
-                Time-series charts will render here when the API provides aggregated series data.
-              </p>
-            </div>
-          </section>
           <div className="tt-table-wrap">
             <table className="tt-table">
               <thead><tr><th>Time</th><th>Agent</th><th>CPU</th><th>Memory</th></tr></thead>

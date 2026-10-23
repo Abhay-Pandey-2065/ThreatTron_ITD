@@ -44,12 +44,8 @@ export function NetworkPage() {
   return (
     <DomainPageLayout
       title="Network"
-      lead="Ethical network telemetry: hashed IPs, ports, status. No payload capture."
+      lead="Connection metadata only. IP addresses are hashed, and no content is captured."
     >
-      <p className="tt-dash__muted" style={{ marginBottom: '1.25rem', maxWidth: '40rem' }}>
-        Connection metadata with SHA-256 hashed IPs. Content and payloads are never captured.
-        All telemetry is anonymized for privacy.
-      </p>
       {loading ? (
         <div className="tt-empty-state">
           <p className="tt-empty-state__message">Loading…</p>
@@ -64,7 +60,7 @@ export function NetworkPage() {
           extraControls={<label className="tt-filter"><span className="tt-filter__label">Status</span><select className="tt-select" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="">All statuses</option>{statuses.map((status) => <option key={status} value={status}>{status}</option>)}</select></label>}
         >
           {(filteredEvents) => filteredEvents.length === 0 ? (
-        <EmptyState title={events.length ? 'No matching network events' : 'No network events'} message={events.length ? 'Adjust the search, date, or status filters.' : 'Network connection metadata will appear here once the agent collects data.'} />
+        <EmptyState title={events.length ? 'No matching network events' : 'No network events'} message={events.length ? 'Adjust the search, date, or status filters.' : 'No connections in this range.'} />
       ) : (
         <div className="tt-table-wrap">
           <table className="tt-table">
@@ -73,10 +69,10 @@ export function NetworkPage() {
                 <th>Time</th>
                 <th>Agent</th>
                 <th>Process</th>
-                <th>Local Hash</th>
-                <th>L.Port</th>
-                <th>Remote Hash</th>
-                <th>R.Port</th>
+                <th>Local IP (hashed)</th>
+                <th>Local port</th>
+                <th>Remote IP (hashed)</th>
+                <th>Remote port</th>
                 <th>Status</th>
                 <th>PID</th>
               </tr>

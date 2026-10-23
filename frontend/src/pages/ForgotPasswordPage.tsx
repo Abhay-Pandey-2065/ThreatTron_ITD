@@ -19,21 +19,16 @@ export function ForgotPasswordPage() {
       <div className="tt-login__card">
         <p className="tt-login__breadcrumb">
           <Link className="tt-link" to={backHref}>
-            ← Back to sign in
+            Back to sign in
           </Link>
         </p>
         <h1 className="tt-login__title">Forgot password</h1>
-        <p className="tt-login__subtitle">
-          {portal === 'admin' ? 'Administrator' : 'User'} portal — request a reset link when the
-          backend supports it.
-        </p>
+        <p className="tt-login__subtitle">Enter your email address to start a password reset.</p>
 
         {submitted ? (
           <p className="tt-dash__muted" role="status">
-            If an account exists for <strong>{email || 'that address'}</strong>, password reset
-            instructions would be sent. This demo has no mailer yet; implement{' '}
-            <code className="tt-inline-code">POST /auth/forgot-password</code> and connect this
-            form.
+            Password reset by email is not available yet. Contact an administrator to reset{' '}
+            {email ? <strong>{email}</strong> : 'your password'}.
           </p>
         ) : (
           <form className="tt-login__form" onSubmit={handleSubmit} noValidate>

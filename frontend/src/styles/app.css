@@ -105,8 +105,7 @@
 
 .tt-shell__role {
   font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: normal;
   color: var(--text-muted);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
@@ -242,7 +241,7 @@
   color: var(--accent);
   font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: normal;
 }
 
 .tt-alert-actions {
@@ -409,9 +408,7 @@ button.tt-link--button:hover {
   justify-content: center;
   padding: 1.5rem;
   box-sizing: border-box;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(167, 139, 250, 0.15), transparent),
-    var(--bg);
+  background: var(--bg);
 }
 
 .tt-landing__inner {
@@ -459,7 +456,7 @@ button.tt-link--button:hover {
 }
 
 .tt-landing__card--accent {
-  border-color: rgba(167, 139, 250, 0.35);
+  border-color: var(--accent-border);
 }
 
 .tt-landing__card-title {
@@ -481,9 +478,7 @@ button.tt-link--button:hover {
   justify-content: center;
   padding: 1.5rem;
   box-sizing: border-box;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(167, 139, 250, 0.15), transparent),
-    var(--bg);
+  background: var(--bg);
 }
 
 .tt-login__card {
@@ -603,8 +598,7 @@ button.tt-link--button:hover {
 
 .tt-login__signed-role {
   font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: normal;
   color: var(--text-muted);
   padding: 0.2rem 0.5rem;
   border-radius: 4px;
@@ -726,8 +720,7 @@ button.tt-link--button:hover {
   padding: 0 0.5rem;
   font-size: 0.6875rem;
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: normal;
   color: var(--text-muted);
 }
 
@@ -931,8 +924,7 @@ button.tt-link--button:hover {
 
 .tt-filter__label {
   font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: normal;
   color: var(--text-muted);
 }
 
@@ -1044,8 +1036,7 @@ button.tt-link--button:hover {
 
 .tt-user-menu__role-pill {
   font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: normal;
   color: var(--text-muted);
 }
 
@@ -1091,10 +1082,8 @@ button.tt-link--button:hover {
 }
 
 .tt-dash__section {
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 1rem 1.15rem;
-  background: var(--bg-elevated);
+  border-top: 1px solid var(--border);
+  padding: 1.1rem 0 0;
 }
 
 .tt-dash__section-head {
@@ -1131,11 +1120,9 @@ button.tt-link--button:hover {
 }
 
 .tt-kpi-card {
-  border: 1px solid var(--border);
-  border-top: 2px solid var(--border-strong);
-  border-radius: 6px;
-  padding: 0.75rem 0.9rem;
-  background: var(--bg-elevated);
+  border-left: 2px solid var(--border-strong);
+  padding: 0.1rem 0 0.1rem 0.75rem;
+  background: none;
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -1143,8 +1130,7 @@ button.tt-link--button:hover {
 
 .tt-kpi-card__label {
   font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: normal;
   color: var(--text-muted);
 }
 
@@ -1190,8 +1176,7 @@ button.tt-link--button:hover {
 
 .tt-feed-item__type {
   font-family: var(--mono);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   font-weight: 500;
   color: var(--text-h);
   font-size: 0.6875rem;
@@ -1220,7 +1205,6 @@ button.tt-link--button:hover {
   border-radius: 4px;
   text-decoration: none;
   font-weight: 600;
-  text-transform: uppercase;
 }
 
 .tt-feed-item__badge--ml {
@@ -1248,8 +1232,7 @@ button.tt-link--button:hover {
 .tt-ml-strip__label {
   display: block;
   font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: normal;
   color: var(--text-muted);
   margin-bottom: 0.2rem;
 }
@@ -1294,8 +1277,7 @@ button.tt-link--button:hover {
 
 .tt-ml-meta dt {
   font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: normal;
   color: var(--text-muted);
   margin: 0 0 0.15rem;
 }
@@ -1458,8 +1440,7 @@ button.tt-link--button:hover {
 
 .tt-table th {
   font-size: 0.6875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: normal;
   color: var(--text-muted);
   font-weight: 500;
   white-space: nowrap;
@@ -1540,8 +1521,7 @@ button.tt-link--button:hover {
   gap: 0.35rem;
   font-size: 0.6875rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: normal;
   padding: 0.125rem 0.5rem 0.125rem 0.4rem;
   border-radius: 999px;
   white-space: nowrap;
@@ -1681,7 +1661,7 @@ button.tt-link--button:hover {
 
 /* Overview: triage row */
 .tt-kpi-card--critical {
-  border-top-color: var(--severity-critical);
+  border-left-color: var(--severity-critical);
 }
 
 .tt-kpi-card--critical .tt-kpi-card__value {
@@ -1689,7 +1669,7 @@ button.tt-link--button:hover {
 }
 
 .tt-kpi-card--warn {
-  border-top-color: var(--severity-warn);
+  border-left-color: var(--severity-warn);
 }
 
 .tt-triage__empty {
@@ -1739,4 +1719,556 @@ button.tt-link--button:hover {
   .tt-triage-item__time {
     display: none;
   }
+}
+
+/* ── Shared controls ── */
+.tt-check {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text-h);
+  cursor: pointer;
+}
+
+.tt-field--inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ── Workflow sandbox ── */
+.tt-sandbox-heading {
+  margin: 0 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.tt-sandbox-range {
+  width: 100%;
+  accent-color: var(--interactive);
+}
+
+.tt-sandbox-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.5rem 1rem;
+  margin-top: 0.5rem;
+}
+
+.tt-sandbox-form-actions {
+  margin-top: 1rem;
+}
+
+.tt-sandbox-section {
+  margin-top: 1.75rem;
+}
+
+.tt-sandbox-section__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tt-sandbox-section__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.tt-sandbox-case > .tt-sandbox-case__head {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.tt-sandbox-case > .tt-sandbox-case__head--split {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.tt-sandbox-case__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.tt-sandbox-case__meta {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+
+.tt-sandbox-subhead {
+  margin: 1rem 0 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.tt-sandbox-alert {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.tt-sandbox-alert__summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  color: var(--text-h);
+}
+
+.tt-sandbox-alert__note {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+/* ── Sidebar icons ── */
+.tt-sidenav__icon {
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.tt-sidenav--active .tt-sidenav__icon {
+  color: var(--accent);
+}
+
+.tt-brand-mark {
+  display: none;
+  color: var(--accent);
+}
+
+.tt-brand-mark svg {
+  display: block;
+}
+
+.tt-shell__sidebar-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tt-shell__sidebar-toggle {
+  color: var(--text-h);
+}
+
+.tt-shell__sidebar-toggle svg {
+  display: block;
+}
+
+.tt-shell--sidebar-collapsed .tt-brand-mark {
+  display: inline-flex;
+}
+
+/* ── Alerts ── */
+.tt-alert-title {
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-h);
+  text-align: left;
+  cursor: pointer;
+}
+
+.tt-alert-title:hover {
+  text-decoration: underline;
+}
+
+.tt-drawer__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.tt-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Investigations ── */
+.tt-workflow-layout__back {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.tt-workflow-layout__wide {
+  grid-column: 1 / -1;
+}
+
+/* ── User activity lookup ── */
+.tt-admin-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin: 1rem 0 1.25rem;
+}
+
+.tt-admin-form__field {
+  min-width: 20rem;
+}
+
+.tt-admin-sessions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.75rem 1.25rem;
+}
+
+.tt-admin-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.tt-admin-section {
+  margin-bottom: 0.5rem;
+}
+
+/* ── Shared: segmented control, meter, bars, levels, spinner ── */
+.tt-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elevated);
+}
+
+.tt-segmented--wide {
+  display: flex;
+  margin-bottom: 1rem;
+}
+
+.tt-segmented--wide .tt-segmented__item {
+  flex: 1;
+}
+
+.tt-segmented__item {
+  padding: 0.3rem 0.7rem;
+  border: none;
+  border-radius: 4px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8125rem;
+  cursor: pointer;
+}
+
+.tt-segmented__item:hover {
+  color: var(--text-h);
+}
+
+.tt-segmented__item--active {
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-weight: 600;
+}
+
+.tt-segmented__item:focus-visible {
+  outline: 2px solid var(--accent-border);
+  outline-offset: 2px;
+}
+
+.tt-meter {
+  height: 6px;
+  margin: 0.75rem 0 0.5rem;
+  border-radius: 3px;
+  background: var(--border-strong);
+  overflow: hidden;
+}
+
+.tt-meter__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.tt-meter__fill--low,
+.tt-bar__fill--low {
+  background: var(--severity-info);
+}
+
+.tt-meter__fill--medium,
+.tt-bar__fill--medium {
+  background: var(--severity-warn);
+}
+
+.tt-meter__fill--high,
+.tt-bar__fill--high {
+  background: var(--severity-critical);
+}
+
+.tt-level {
+  font-weight: 600;
+}
+
+.tt-level--low {
+  color: var(--severity-info);
+}
+
+.tt-level--medium {
+  color: var(--severity-warn);
+}
+
+.tt-level--high {
+  color: var(--severity-critical);
+}
+
+.tt-bar {
+  margin-bottom: 0.75rem;
+}
+
+.tt-bar__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+
+.tt-bar__track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border-strong);
+  overflow: hidden;
+}
+
+.tt-bar__fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--interactive);
+  transition: width 0.6s ease;
+}
+
+.tt-spinner {
+  display: inline-block;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-right: 0.4rem;
+  vertical-align: -0.15rem;
+  border: 2px solid var(--border-strong);
+  border-top-color: var(--text-h);
+  border-radius: 50%;
+  animation: tt-spin 0.8s linear infinite;
+}
+
+.tt-spinner--lg {
+  width: 2rem;
+  height: 2rem;
+  margin: 0 0 0.75rem;
+  border-width: 3px;
+}
+
+@keyframes tt-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tt-spinner {
+    animation-duration: 2.4s;
+  }
+
+  .tt-meter__fill,
+  .tt-bar__fill {
+    transition: none;
+  }
+}
+
+.tt-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  gap: 0.75rem 1rem;
+  margin: 0 0 1rem;
+}
+
+.tt-facts dt {
+  margin: 0 0 0.15rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.tt-facts dd {
+  margin: 0;
+  color: var(--text-h);
+  overflow-wrap: anywhere;
+}
+
+/* ── ML insights: live risk ── */
+.tt-ml-section {
+  margin-top: 1.5rem;
+}
+
+.tt-live__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.tt-live__status {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+}
+
+.tt-live__body {
+  display: grid;
+  grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.tt-live__score {
+  margin: 0;
+  font-size: 2.25rem;
+  line-height: 1.1;
+  font-family: var(--mono);
+  font-weight: 500;
+}
+
+.tt-live__caption,
+.tt-live__level {
+  margin: 0.25rem 0 0;
+  font-size: 0.875rem;
+}
+
+.tt-live__section {
+  margin-top: 1rem;
+}
+
+.tt-live__heading {
+  margin: 0 0 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.tt-live__patterns {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.875rem;
+  color: var(--text-h);
+}
+
+.tt-live--offline .tt-live__score {
+  color: var(--text-muted);
+}
+
+@media (max-width: 720px) {
+  .tt-live__body {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── ML insights: scenario tester ── */
+.tt-sandbox-ml__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.tt-sandbox-ml__form {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.tt-sandbox-ml__field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.tt-sandbox-ml__field label {
+  font-size: 0.8125rem;
+  color: var(--text);
+}
+
+.tt-sandbox-ml__input {
+  width: 7rem;
+  text-align: right;
+}
+
+.tt-sandbox-ml__submit {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.tt-sandbox-ml__placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 16rem;
+  text-align: center;
+}
+
+.tt-sandbox-ml__error {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--severity-critical-bg);
+  border-radius: 6px;
+  color: var(--severity-critical);
+}
+
+.tt-sandbox-ml__error p {
+  margin: 0 0 0.4rem;
+}
+
+.tt-sandbox-result__score {
+  text-align: left;
+}
+
+.tt-sandbox-result__score .tt-level {
+  font-size: 2rem;
+  font-family: var(--mono);
+}
+
+@media (max-width: 900px) {
+  .tt-sandbox-ml__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Layout fixes ── */
+.tt-workflow-layout dl.tt-ml-meta {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+}
+
+.tt-sandbox-actions {
+  justify-content: flex-start;
 }

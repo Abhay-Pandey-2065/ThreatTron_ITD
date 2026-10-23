@@ -38,7 +38,7 @@ export function OverviewRecentFeed() {
       ) : events.length === 0 ? (
         <div className="tt-feed-empty">
           <p className="tt-dash__muted">
-            No events loaded yet. Ingest and list APIs will populate this feed.
+            No events in this range.
           </p>
         </div>
       ) : (

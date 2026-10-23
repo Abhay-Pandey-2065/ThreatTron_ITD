@@ -35,7 +35,7 @@ export function USBPage() {
   }, [refetch])
 
   return (
-    <DomainPageLayout title="USB" lead="Insert and remove events with mountpoint.">
+    <DomainPageLayout title="USB" lead="Device insert and remove events, with the mount point.">
       {loading ? (
         <div className="tt-empty-state">
           <p className="tt-empty-state__message">Loading…</p>
@@ -45,7 +45,7 @@ export function USBPage() {
       ) : (
         <EventFilters events={events} searchText={(event) => [event.agent_id, event.event_type, event.mountpoint].join(' ')}>
           {(filteredEvents) => filteredEvents.length === 0 ? (
-        <EmptyState title={events.length ? 'No matching USB events' : 'No USB events'} message={events.length ? 'Adjust the search or date filters.' : 'USB events will appear here once telemetry is available.'} />
+        <EmptyState title={events.length ? 'No matching USB events' : 'No USB events'} message={events.length ? 'Adjust the search or date filters.' : 'No USB events in this range.'} />
       ) : (
         <div className="tt-table-wrap">
           <table className="tt-table">

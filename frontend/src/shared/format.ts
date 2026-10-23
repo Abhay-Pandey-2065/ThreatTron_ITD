@@ -19,3 +19,15 @@ export function formatRelative(ts: string, now: number = Date.now()): string {
   if (days < 7) return `${days}d ago`
   return formatAbsoluteUtc(ts).slice(0, 10)
 }
+
+/** Plain-language names for the global time-range presets. */
+export const RANGE_LABELS: Record<string, string> = {
+  '1h': 'Last hour',
+  '24h': 'Last 24 hours',
+  '7d': 'Last 7 days',
+  custom: 'Custom range',
+}
+
+export function rangeLabel(range: string): string {
+  return RANGE_LABELS[range] ?? range
+}

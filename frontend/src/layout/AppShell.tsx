@@ -5,11 +5,12 @@ import { ShellFiltersProvider } from './ShellFiltersProvider'
 import { useShellFilters } from './useShellFilters'
 import type { TimeRangePreset } from './shell-filters-context'
 import { UserMenu } from './UserMenu'
+import { NavIcon, type NavIconName } from './NavIcon'
 
 interface NavItem {
   to: string
   label: string
-  abbr: string
+  icon: NavIconName
   end?: boolean
 }
 
@@ -20,27 +21,27 @@ interface NavSection {
 }
 
 const NAV_SECTIONS: NavSection[] = [
-  { title: null, items: [{ to: '/overview', label: 'Overview', abbr: 'OV', end: true }] },
+  { title: null, items: [{ to: '/overview', label: 'Overview', icon: 'overview', end: true }] },
   {
     title: 'Investigate',
     items: [
-      { to: '/alerts', label: 'Alerts', abbr: 'AL' },
-      { to: '/investigations', label: 'Investigations', abbr: 'IN' },
-      { to: '/workflow-sandbox', label: 'Workflow Sandbox', abbr: 'WS' },
+      { to: '/alerts', label: 'Alerts', icon: 'alerts' },
+      { to: '/investigations', label: 'Investigations', icon: 'investigations' },
+      { to: '/workflow-sandbox', label: 'Workflow sandbox', icon: 'sandbox' },
     ],
   },
   {
     title: 'Telemetry',
     items: [
-      { to: '/files', label: 'Files', abbr: 'FI' },
-      { to: '/processes', label: 'Processes', abbr: 'PR' },
-      { to: '/system', label: 'System', abbr: 'SY' },
-      { to: '/usb', label: 'USB', abbr: 'US' },
-      { to: '/network', label: 'Network', abbr: 'NW' },
+      { to: '/files', label: 'Files', icon: 'files' },
+      { to: '/processes', label: 'Processes', icon: 'processes' },
+      { to: '/system', label: 'System', icon: 'system' },
+      { to: '/usb', label: 'USB', icon: 'usb' },
+      { to: '/network', label: 'Network', icon: 'network' },
     ],
   },
-  { title: 'Analytics', items: [{ to: '/ml', label: 'ML / Insights', abbr: 'ML' }] },
-  { title: 'Admin', items: [{ to: '/admin', label: 'Admin', abbr: 'AD' }], adminOnly: true },
+  { title: 'Analytics', items: [{ to: '/ml', label: 'ML insights', icon: 'ml' }] },
+  { title: 'Admin', items: [{ to: '/admin', label: 'User lookup', icon: 'admin' }], adminOnly: true },
 ]
 
 const ALL_ITEMS = NAV_SECTIONS.flatMap((section) => section.items)
@@ -68,11 +69,11 @@ function AppShellLayout() {
     (item) => location.pathname === item.to || location.pathname.startsWith(`${item.to}/`),
   )
   const currentSection = NAV_SECTIONS.find((section) => section.items.includes(current as NavItem))
-  const pageLabel = current?.label ?? 'Console'
+  const pageLabel = current?.label ?? 'ThreatTron'
 
   useEffect(() => {
-    document.title = `${pageLabel} · ThreatTron`
-  }, [pageLabel])
+    document.title = current ? `${pageLabel} · ThreatTron` : 'ThreatTron'
+  }, [pageLabel, current])
 
   return (
     <div
@@ -85,10 +86,10 @@ function AppShellLayout() {
       >
         <div className="tt-shell__sidebar-header">
           <NavLink to={navTo('/overview')} className="tt-shell__sidebar-logo" end>
-            <span className="tt-brand-name">ThreatTron</span>
             <span className="tt-brand-mark" aria-hidden>
-              TT
+              <NavIcon name="brand" />
             </span>
+            <span className="tt-brand-name">ThreatTron</span>
           </NavLink>
           <button
             type="button"
@@ -97,7 +98,7 @@ function AppShellLayout() {
             aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             aria-expanded={!sidebarCollapsed}
           >
-            {sidebarCollapsed ? '›' : '‹'}
+            <NavIcon name={sidebarCollapsed ? 'chevron-right' : 'chevron-left'} />
           </button>
         </div>
         <nav className="tt-shell__sidebar-nav">
@@ -117,9 +118,7 @@ function AppShellLayout() {
                   end={item.end}
                   title={item.label}
                 >
-                  <span className="tt-sidenav__abbr" aria-hidden>
-                    {item.abbr}
-                  </span>
+                  <NavIcon name={item.icon} className="tt-sidenav__icon" />
                   <span className="tt-sidenav__label">{item.label}</span>
                 </NavLink>
               ))}
@@ -131,23 +130,11 @@ function AppShellLayout() {
       <div className="tt-shell__column">
         <header className="tt-shell__topbar">
           <div className="tt-shell__topbar-left">
-            <nav className="tt-breadcrumb" aria-label="Breadcrumb">
-              <span>Console</span>
-              {currentSection?.title ? (
-                <>
-                  <span className="tt-breadcrumb__sep" aria-hidden>
-                    /
-                  </span>
-                  <span>{currentSection.title}</span>
-                </>
-              ) : null}
-              <span className="tt-breadcrumb__sep" aria-hidden>
-                /
-              </span>
-              <span className="tt-breadcrumb__current" aria-current="page">
-                {pageLabel}
-              </span>
-            </nav>
+            {currentSection?.title ? (
+              <nav className="tt-breadcrumb" aria-label="Breadcrumb">
+                <span>{currentSection.title}</span>
+              </nav>
+            ) : null}
             <div className="tt-shell__topbar-filters" role="search" aria-label="Global filters">
               <label className="tt-filter">
                 <span className="tt-filter__label">Time range</span>
@@ -156,10 +143,10 @@ function AppShellLayout() {
                   value={timeRange}
                   onChange={(e) => setTimeRange(e.target.value as TimeRangePreset)}
                 >
-                  <option value="1h">Last 1 hour</option>
+                  <option value="1h">Last hour</option>
                   <option value="24h">Last 24 hours</option>
                   <option value="7d">Last 7 days</option>
-                  <option value="custom">Custom (set dates on page)</option>
+                  <option value="custom">Custom dates</option>
                 </select>
               </label>
               <label className="tt-filter">
@@ -170,7 +157,7 @@ function AppShellLayout() {
                   placeholder="All agents"
                   value={agentFilter}
                   onChange={(e) => setAgentFilter(e.target.value)}
-                  aria-label="Filter by agent id"
+                  aria-label="Filter by agent ID"
                 />
               </label>
             </div>
@@ -179,7 +166,6 @@ function AppShellLayout() {
             <span className={`tt-status-dot ${online ? '' : 'tt-status-dot--offline'}`}>
               {online ? 'Online' : 'Offline'}
             </span>
-            <UtcClock />
           </div>
           <div className="tt-shell__topbar-user">
             <UserMenu />
@@ -191,22 +177,6 @@ function AppShellLayout() {
         </main>
       </div>
     </div>
-  )
-}
-
-function UtcClock() {
-  const [now, setNow] = useState(() => new Date())
-
-  useEffect(() => {
-    const id = window.setInterval(() => setNow(new Date()), 1000)
-    return () => window.clearInterval(id)
-  }, [])
-
-  const iso = now.toISOString()
-  return (
-    <time className="tt-clock" dateTime={iso}>
-      {iso.slice(11, 19)} UTC
-    </time>
   )
 }
 

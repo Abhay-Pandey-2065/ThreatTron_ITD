@@ -295,7 +295,9 @@ export interface RiskResponse {
 }
 
 export async function fetchLiveRisk(agentId: string, window: number): Promise<RiskResponse> {
-  return await fetchJson<RiskResponse>(`/api/risk?agent_id=${agentId}&window=${window}`)
+  return await fetchJson<RiskResponse>(
+    `/api/risk?agent_id=${encodeURIComponent(agentId)}&window=${window}`,
+  )
 }
 
 export type AlertStatus = 'open' | 'acknowledged' | 'investigating' | 'resolved' | 'false_positive'
@@ -469,12 +471,17 @@ export async function fetchWorkflowAudit(entityType: string, entityId: number): 
   return data.events ?? []
 }
 
-export async function fetchSandboxScenarios(): Promise<SandboxScenario[]> {
-  const data = await fetchJson<{ cases?: SandboxScenario[] }>('/api/security/sandbox/cases')
+export async function fetchSandboxScenarios(limit = 50): Promise<SandboxScenario[]> {
+  const data = await fetchJson<{ cases?: SandboxScenario[] }>(`/api/security/sandbox/cases?limit=${limit}`)
   return data.cases ?? []
 }
 
-export async function createSandboxScenario(payload: { scenario: string; risk_score: number; rules_triggered: string[] }): Promise<SandboxScenario> {
+export async function createSandboxScenario(payload: {
+  scenario: string
+  risk_score: number
+  rules_triggered: string[]
+  is_threat?: boolean
+}): Promise<SandboxScenario> {
   return await fetchJson<SandboxScenario>('/api/security/sandbox/cases', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -522,8 +529,8 @@ export async function addSandboxInvestigationNote(id: number, body: string): Pro
   })
 }
 
-export async function fetchSandboxInvestigations(): Promise<SandboxInvestigation[]> {
-  const data = await fetchJson<{ investigations?: SandboxInvestigation[] }>('/api/security/sandbox/investigations')
+export async function fetchSandboxInvestigations(limit = 50): Promise<SandboxInvestigation[]> {
+  const data = await fetchJson<{ investigations?: SandboxInvestigation[] }>(`/api/security/sandbox/investigations?limit=${limit}`)
   return data.investigations ?? []
 }
 

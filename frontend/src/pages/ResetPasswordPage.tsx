@@ -18,13 +18,13 @@ export function ResetPasswordPage() {
       return
     }
     if (password.length < 8) {
-      setMessage('Password must be at least 8 characters.')
+      setMessage('Use at least 8 characters.')
       return
     }
     setMessage(
       token
-        ? 'This demo does not validate tokens. Implement POST /auth/reset-password with the token from email.'
-        : 'Missing reset token. Open the link from your email, or request a new reset from Forgot password.',
+        ? 'Password reset is not available yet. Contact an administrator to reset your password.'
+        : 'This reset link is incomplete. Request a new one from the forgot password page.',
     )
   }
 
@@ -33,18 +33,11 @@ export function ResetPasswordPage() {
       <div className="tt-login__card">
         <p className="tt-login__breadcrumb">
           <Link className="tt-link" to={backHref}>
-            ← Back to sign in
+            Back to sign in
           </Link>
         </p>
         <h1 className="tt-login__title">Reset password</h1>
-        <p className="tt-login__subtitle">
-          Set a new password when your API accepts a valid reset token.
-        </p>
-        {token ? (
-          <p className="tt-dash__muted tt-reset-token">
-            Token present (preview): <code className="tt-inline-code">{token.slice(0, 12)}…</code>
-          </p>
-        ) : null}
+        <p className="tt-login__subtitle">Choose a new password for your account.</p>
 
         <form className="tt-login__form" onSubmit={handleSubmit} noValidate>
           <label className="tt-field">

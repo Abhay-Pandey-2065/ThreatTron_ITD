@@ -39,7 +39,7 @@ export function FilesPage() {
   return (
     <DomainPageLayout
       title="Files"
-      lead="File and move events. Click a row for full metadata."
+      lead="File and move events. Select a row to see its details."
     >
       {loading ? (
         <div className="tt-empty-state">
@@ -52,7 +52,7 @@ export function FilesPage() {
           {(filteredEvents) => filteredEvents.length === 0 ? (
         <EmptyState
           title={events.length ? 'No matching file events' : 'No file events'}
-          message={events.length ? 'Adjust the search or date filters.' : 'File and move events will appear here once telemetry is available.'}
+          message={events.length ? 'Adjust the search or date filters.' : 'No file events in this range.'}
         />
       ) : (
         <div className="tt-table-wrap">

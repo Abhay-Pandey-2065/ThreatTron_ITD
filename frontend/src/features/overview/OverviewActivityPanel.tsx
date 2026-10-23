@@ -164,17 +164,17 @@ export function OverviewActivityPanel() {
     <section className="tt-dash__section" aria-labelledby="activity-heading">
       <div className="tt-dash__section-head">
         <h2 id="activity-heading" className="tt-dash__h2">
-          Activity & agents
+          Activity and agents
         </h2>
         <span className="tt-activity__caption">
-          {loading ? 'Loading…' : `${events.length} of latest ${SAMPLE_LIMIT} events sampled`}
+          {loading ? 'Loading…' : `Sampled ${events.length} of the latest ${SAMPLE_LIMIT} events`}
         </span>
       </div>
 
       {loading ? (
         <p className="tt-dash__muted">Loading…</p>
       ) : events.length === 0 ? (
-        <p className="tt-dash__muted">No telemetry in this window yet.</p>
+        <p className="tt-dash__muted">No events in this range.</p>
       ) : (
         <div className="tt-activity">
           <div>
@@ -195,7 +195,7 @@ export function OverviewActivityPanel() {
                   <tr>
                     <th>Agent</th>
                     <th className="tt-num">Events</th>
-                    <th className="tt-num">Per hr</th>
+                    <th className="tt-num">Per hour</th>
                     <th>Last seen</th>
                   </tr>
                 </thead>
